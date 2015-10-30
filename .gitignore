@@ -55,3 +55,13 @@ docs/_build/
 
 # PyBuilder
 target/
+
+# Ignore LaTex file
+*.aux
+*.bbl
+*.blg
+*.fdb_latexmk
+*.out
+*.pdf
+*.synctex.gz
+

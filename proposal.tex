@@ -1,0 +1,68 @@
+\documentclass[10pt]{article}
+\usepackage{hyperref}
+\usepackage{graphicx}
+\usepackage{enumerate,fullpage,amsmath,amssymb}
+\usepackage{hyperref}
+
+\hypersetup{%
+  colorlinks=true,% hyperlinks will be coloured
+}
+
+\title{CS 281 Final Project Proposal: Crime Predictions}
+\author{\href{mailto:keskici@college.harvard.edu}{Kevin Eskici} and \href{mailto:luisperez@college.harvard.edu}{Luis A. Perez}, Harvard University}
+\date{\today}
+
+\begin{document}
+
+ \begin{center}
+  \framebox{
+    \vbox{
+    \hbox to 6.5in { {CS 182: Artificial Intelligence}
+    \hfill Final Project Proposal}
+    \vspace{4mm}
+    \hbox to 6.5in { {\large \hfill Document Summarization: Teaching Machines to Read \hfill} }
+    \vspace{2mm}
+    \hbox to 6.5in { {\it Kevin Eskici (keskici@college.harvard.edu) \hfill Luis Antonio Perez (luisperez@college.harvard.edu)} }
+    }
+  }
+  \end{center}
+
+\section{Project Topic}
+For this project, we propose focusing on the topic of single-document summarization (generation of new text summarizing assigned class readings, textbook chapters, etc.), with an extension to multi-document summarization to generate aggregations from new data sources (such as news sources). The latter part we expect to achieve as a reach-goal, and only if time proves sufficient.
+
+\section{Background Information}
+
+ We intend to explore the area of artificial intelligence known as \href{https://en.wikipedia.org/wiki/Natural_language_processing}{natural language processing} (NLP), and in particular, we intend to tackle the problem of document summarization. As implied by the references listed in this proposal, document summarization is an extremely important area in NLP. Application of automatic text summarization are evident, such as aggregating news sources, class readings, or business reports. Currently, such tasks are performed by assistants or aides, and while we do not expect our system to accurately summarize all documents, the literature shows that technical documents (such as annual business reports, textbook chapters, etc), are within the reach of AI. In our case, we will focus exclusively on material assigned to a typical college student (ie, textbook chapters, readings, research papers, etc).
+
+
+\section{System Overview}
+The system we intend to build will take as input a document $D$ of a particular length $|D|$, where $|D|$ is defined to be the number of words, and will generate a new document $D'$ which summarizes the key points in the original documents. The new document will present factual information in a human-readable way.  We will include a hard limit where $|D'| \leq c|D|$ for some $0 < c < 1$ yet to be determined. In general, we are hopeful that our system will be able to intelligently determine the best length of the summarization. We will maintain our focus on summarizing the document, therefore the system will take as input an arbitrary text file consisting of English words \footnote{We do not expect to have the time to generalize to multiple languages, though from a quick search in the literature, multi-language summarization is an active area of research. It lies somewhat outside the scope of our project, however.}. We hope that tackling the representation issue will require minimal amount of work, as we expect to focus on different models for summarizing text. \\
+
+In more detail, the document will take as input a text file. The first step will consists of translating this document into a valid, machine-friendly representation. For a simple proposal, we consider using a \href{https://en.wikipedia.org/wiki/Bag-of-words_model}{bag-of-words} approach and determining word rankings (based on frequency of the words, ignoring \href{https://en.wikipedia.org/wiki/Stop_words}{stop-words}). We also plan to look into more complicated, NLP-based approaches. \\
+
+The next step is summarization. From what we’ve found in the literature, the most common, model approaches involve machine learning methods such as hidden markov models and neural nets. The survey paper by Das and Martins \cite{survey} has a list of possible approaches, though we’ll focus on HMMs for the project and extend to other methods if time allows. In general, the focus will remain on machine learning methods for NLP, with an emphasis on document summarization. For additional methods, we're interesting in learning more about neural nets (discussed in survey paper \cite{survey}), as well as naive bayes classifiers.
+
+\section{Extensions}
+Multi-document summarization \cite{multi_document}. We plan to only tackle single-document summarization, and if time allows, are hopeful to attempt an extension on our project that allows for news aggregation by summarizing multiple documents sources. \\
+
+Neural networks, sentence compression. The survey paper lists a few additional methods that we’re interested in exploring, eventually providing quantitative evaluation feedback for each system we design. For example, summarization through sentence extraction appears promising \cite{sentence_summary}.
+
+
+\section{Collaboration Plan}
+We plan to explore multiple methods of text summarization, as discussed above. Given that the literature currently leans towards HMMs as good methods for understanding text (and that we’re most excited about HMMs), Kevin and I plan to collaborate concurrently on implementing a summarization system based on HMMs. The project will be open sourced and hosted on github. While empty, there current repository can be found here: \href{https://github.com/kandluis/document_summaries}{https://github.com/kandluis/document\_summaries} \\
+
+As for data collection, \href{https://archive.org/details/gutenberg}{Project Gutenberg} appears to be a good source of text documents we can attempt to feed into our system.
+
+\section{Tools}
+We expect the following tools to be useful when interpreting unstructured text.
+\begin{itemize}
+\item \href{http://www.nltk.org/}{Python Natural Language ToolKit}
+\item \href{http://nlp.stanford.edu/software/corenlp.shtml}{Stanford CoreNLP Tools}
+\end{itemize}
+
+\nocite {hmm_summary}
+\bibliography{references}
+\bibliographystyle{alpha}
+
+
+\end{document}
