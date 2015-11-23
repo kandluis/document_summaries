@@ -65,3 +65,6 @@ target/
 *.pdf
 *.synctex.gz
 
+
+# Ignore synchronized data folder
+cs182_data/
