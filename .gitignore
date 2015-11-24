@@ -64,7 +64,7 @@ target/
 *.out
 *.pdf
 *.synctex.gz
-
+*.fls
 
 # Ignore synchronized data folder
 cs182_data/

@@ -1,5 +1,13 @@
 '''
 Contains useful utility functions use throughout other areas in our code.
+
+Copyright, 2015.
+
+Authors:
+Luis Perez (luis.perez.live@gmail.com)
+Kevin Eskici (keskici@college.harvar.edu)
+
+Harvard University.
 '''
 from collections import Counter
 import numpy as np

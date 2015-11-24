@@ -13,9 +13,9 @@ import numpy as np
 def docToMatrix(D, vec_fun=tf_idf, sim_fun=cosineSim):
     '''
     Given a document d which consists of a set of sentences, converts it into a
-    |D|_s x |D|_s matrix with weights given by the specifiend similarity
-    function. The similary function should take as input vector representations
-    as output by the vec_fun.
+    |D|_s x |D|_s matrix with weights given by the specified similarity
+    function. The similarity function should take as input vector
+    representation as output by the vec_fun.
     '''
     # Convert sentences to vector representations!
     sentenceVectors = [vec_fun(s) for s in D]
