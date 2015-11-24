@@ -65,3 +65,9 @@ target/
 *.pdf
 *.synctex.gz
 
+
+# Ignore synchronized data folder
+cs182_data/
+
+# Ignore the environment variable (this is local to Luis)
+.env
