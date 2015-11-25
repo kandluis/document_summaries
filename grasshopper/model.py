@@ -7,7 +7,8 @@ Authors:
 Luis Perez (luis.perez.live@gmail.com)
 Kevin Eskici (keskici@college.harvar.edu)
 '''
-from shared.util import tf_idf, cosineSim, clean, stationary
+from ..shared.utils import tf_idf, cosineSim
+from ..shared.utils import clean, stationary, invertMatrixTheorem
 import numpy as np
 
 def docToMatrix(D, vec_fun=tf_idf, sim_fun=cosineSim):
@@ -29,7 +30,7 @@ def docToMatrix(D, vec_fun=tf_idf, sim_fun=cosineSim):
     return M
 
 
-def grasshopper(W, r, lambda, k):
+def grasshopper(W, r, lamb, k, epsilon=0.0001):
     '''
     Implements the Grasshopper algorithm described in the following paper:
     Improving Diversity in Ranking Using Absorbing Random Walks:
@@ -57,17 +58,17 @@ def grasshopper(W, r, lambda, k):
     '''
     # Let's do some basis error checking!
     n,m = W.shape
-    assert(n == m) # Sizes should be equal
-    assert(np.min(W) >= 0) # No negative edges
-    assert(abs(np.sum(r)- 1) < epsilon) # r is a distribution
-    assert(0 <= lamb and lamb <= 1) # lambda is valid
-    assert(0 < k and k <= n) # Summary can't be longer than document!
+    assert n == m  # Sizes should be equal
+    assert np.min(W) >= 0  # No negative edges
+    assert abs(np.sum(r) - 1) < epsilon  # r is a distribution
+    assert 0 <= lamb and lamb <= 1  # lambda is valid
+    assert 0 < k and k <= n  # Summary can't be longer than document!
 
     # Normalize the rows of W to create the transition matrix P'
     P = W / np.sum(W, axis=1)
     hatP = lamb * P - (1 - lamb) * r
 
-    assert(hatP.shape == (n,m)) #  Shape should not change!
+    assert hatP.shape == (n,m)  #  Shape should not change!
 
     # To store results.
     absorbed = []
@@ -75,7 +76,7 @@ def grasshopper(W, r, lambda, k):
     probs = []
 
     # Calculate the most probable state!
-    q = stationary(hatP);
+    q = stationary(hatP)
     absorbed.append(np.argmax(q))
     probs.append(np.max(q))
     nonAbsorbed.remove(np.argmax(q))
