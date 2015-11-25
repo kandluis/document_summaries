@@ -123,7 +123,3 @@ For TextRank, we believe results can be greatly increased by exploring different
 
 Before optimizing these algorithms and extending them to multi document summerization, our focus will be to implement tests as described above so we can track results as we go.
 
-Presentation Type
-=================
-
-We prefer presenting a poster at the poster session on 12/9.
