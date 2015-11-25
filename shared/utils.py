@@ -65,8 +65,10 @@ class MyCounter(Counter):
         ['second', 'third', 'first']
         """
         sortedItems = self.items()
+
         def compare(x, y):
             return sign(y[1] - x[1])
+
         sortedItems.sort(cmp=compare)
         return [x[0] for x in sortedItems]
 
@@ -130,14 +132,60 @@ class MyCounter(Counter):
         return sum
 
 
-def stationary(Mat):
+def stationary(Mat, epsilon=0.0001):
     '''
     Given numpy matrix Mat, returns the vector s such that sX = s, where s is
-    normalized to be a probabiliy distribution.
-    So we have sX = sI -> s(X-I) = 0, so we need to find ker(X-I)
+    normalized to be a probability distribution.
+    So we have sX = sI -> s(X-I) = 0, so we need to find ker(X-I).
+    We use the linealg package in numpy to take care of this for us.
     '''
-    res = np.ones(len(Mat))
-    return res / np.sum(res)
+    values, vectors = np.linalg.eig(Mat.T)
+
+    # Due to floating point imprecision, need to use epsilon values!
+    index = np.nonzero(abs(values - 1.0) < epsilon)
+    q = vectors[:,index]
+
+    return q / np.sum(q)  # convert into probability distribution
+
+
+def invertMatrixTheorem(A, Ainv, indx):
+    '''
+    Computes the inverse of a matrix with one row and column removed using
+    the matrix inversion lemma. It needs a matrix A, the inverse of A,
+    and the row and column index which needs to be removed.
+    '''
+    n, m = A.shape
+    assert(n == m)  # square matrix
+
+    # Remove row and compute inverse
+    u = np.zeros(n)
+    u[indx] = -1
+
+    v = A[indx, :]
+
+    T1 = v.dot(Ainv)
+    T1.shape = (1, n)
+    T2 = Ainv.dot(u.T)
+    T2.shape = (n, 1)
+    T = Ainv - T2.dot(T1) / (1 + T1.dot(u.T))
+
+    # Remove column and compute inverse.
+    w = A[:, indx]
+    w.shape = n
+    w[indx] = 0
+
+    R1 = T.dot(w)
+    R1.shape = (n,1)
+    R2 = u.T.dot(T)
+    R2.shape = (1,n)
+
+    R = T - R1.dot(R2) / (1 + R2.dot(w))
+
+    # Remove redundant rows
+    R = np.delete(R, (indx), axis=0)
+    R = np.delete(R, (indx), axis=1)
+
+    return R
 
 
 def clean(w):

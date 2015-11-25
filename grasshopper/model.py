@@ -56,27 +56,61 @@ def grasshopper(W, r, lambda, k):
     about the expected number of states.
     '''
     # Let's do some basis error checking!
-    n, m = W.shape
-    assert(n == m)  # Sizes should be equal
-    assert(np.min(W) >= 0)  # No negative edges
-    assert(np.sum(r) == 1)  # r is a distribution
-    assert(0 <= lamb and lamb <= 1)  # lambda is valid
-    assert(0 < k and k <= n)  # Summary can't be longer than document!
+    n,m = W.shape
+    assert(n == m) # Sizes should be equal
+    assert(np.min(W) >= 0) # No negative edges
+    assert(abs(np.sum(r)- 1) < epsilon) # r is a distribution
+    assert(0 <= lamb and lamb <= 1) # lambda is valid
+    assert(0 < k and k <= n) # Summary can't be longer than document!
 
     # Normalize the rows of W to create the transition matrix P'
     P = W / np.sum(W, axis=1)
     hatP = lamb * P - (1 - lamb) * r
 
-    res = []
-    for i in xrange(k):
-        # Compute most likely state.
-        q = stationary(hatP)
-        maxIdx, maxProb = np.argmax(q), np.max(q)
-        res.append((maxIdx, maxProb))
+    assert(hatP.shape == (n,m)) #  Shape should not change!
 
-        # Transfrom state into absorbtion state
-        hatP[maxIdx, :] = np.zeros(len(q))
-        hatP[maxIdx, maxIdx] = 1.0
+    # To store results.
+    absorbed = []
+    nonAbsorbed = range(n)
+    probs = []
+
+    # Calculate the most probable state!
+    q = stationary(hatP);
+    absorbed.append(np.argmax(q))
+    probs.append(np.max(q))
+    nonAbsorbed.remove(np.argmax(q))
+
+    # Compute the inverse of the fundamental matrix!
+    N = np.linalg.inv(
+        np.identity(len(nonAbsorbed)) - hatP[nonAbsorbed, nonAbsorbed])
+
+    # Pick the ramaining k-1 items by picking out the most-visited node one by
+    # one. once picked out, the item turns into an absorbing node.
+    while (len(absorbed) < k):
+        # Compute expected number fo times each node will be visited before
+        # random walk is absorbed by absorbing nodes. Averaged over all start
+        # nodes.
+
+        # Compute the expected visit counts
+        nuvisit = np.sum(N, axis=0)
+        nvisit = np.zeros(n)
+        nvisit[nonAbsorbed] = nuvisit
+
+        # Find the new absorbing state
+        absorbState = np.argmax(nvisit)
+        absorbVisit = max(nvisit)
+        # Store the results
+        absorbed.append(absorbState)
+        probs.append(absorbVisit)
+
+        # Compute the inverse using the matrix inversion theorem
+        # Compute the index of the absorbedState in relation to the submatrix Q (see paper for details)
+        index = np.nonzero(abs(nonAbsorbed - absorbState) < epsilon)
+        N = invertMatrixTheorem(np.identity(
+            len(nonAbsorbed)) - hatP[nonAbsorbed, nonAbsorbed], N, index)
+
+        # Update the nonAbsorbed states
+        nonAbsorbed.remove(absorbState)
 
     # Return the results!
-    return res
+    return zip(absorbed, probs)
