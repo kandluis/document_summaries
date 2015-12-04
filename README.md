@@ -1,7 +1,7 @@
 Multi-Document Text Summarization
 =======
-    [Kevin Eskici](mailto:keskici@college.harvard.edu) and [Luis A.
-    Perez](mailto:luisperez@college.harvard.edu), Harvard University
+[Kevin Eskici](mailto:keskici@college.harvard.edu) and [Luis A.
+Perez](mailto:luisperez@college.harvard.edu), Harvard University
 
 
 Project Topic
