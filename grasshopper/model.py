@@ -7,9 +7,10 @@ Authors:
 Luis Perez (luis.perez.live@gmail.com)
 Kevin Eskici (keskici@college.harvar.edu)
 '''
-from ..shared.utils import tf_idf, cosineSim
-from ..shared.utils import clean, stationary, invertMatrixTheorem
+from shared.utils import tf_idf, cosineSim
+from shared.utils import clean, stationary, invertMatrixTheorem
 import numpy as np
+
 
 def docToMatrix(D, vec_fun=tf_idf, sim_fun=cosineSim):
     '''
@@ -57,7 +58,7 @@ def grasshopper(W, r, lamb, k, epsilon=0.0001):
     about the expected number of states.
     '''
     # Let's do some basis error checking!
-    n,m = W.shape
+    n, m = W.shape
     assert n == m  # Sizes should be equal
     assert np.min(W) >= 0  # No negative edges
     assert abs(np.sum(r) - 1) < epsilon  # r is a distribution
@@ -68,7 +69,7 @@ def grasshopper(W, r, lamb, k, epsilon=0.0001):
     P = W / np.sum(W, axis=1)
     hatP = lamb * P - (1 - lamb) * r
 
-    assert hatP.shape == (n,m)  #  Shape should not change!
+    assert hatP.shape == (n, m)  # Shape should not change!
 
     # To store results.
     absorbed = []
@@ -105,7 +106,8 @@ def grasshopper(W, r, lamb, k, epsilon=0.0001):
         probs.append(absorbVisit)
 
         # Compute the inverse using the matrix inversion theorem
-        # Compute the index of the absorbedState in relation to the submatrix Q (see paper for details)
+        # Compute the index of the absorbedState in relation to the submatrix Q
+        # (see paper for details)
         index = np.nonzero(abs(nonAbsorbed - absorbState) < epsilon)
         N = invertMatrixTheorem(np.identity(
             len(nonAbsorbed)) - hatP[nonAbsorbed, nonAbsorbed], N, index)

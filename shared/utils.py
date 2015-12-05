@@ -11,6 +11,12 @@ Harvard University.
 '''
 from collections import Counter
 import numpy as np
+import re
+from nltk.corpus import stopwords
+
+# Global variables to improve performance on common words.
+englishStops = stopwords.words('english')
+regex = re.compile('[^a-zA-Z]')
 
 
 class MyCounter(Counter):
@@ -23,6 +29,7 @@ class MyCounter(Counter):
     the vectorization of sentences. In particular, counters can be normalized,
     multiplied, etc.
     """
+
     def __getitem__(self, idx):
         self.setdefault(idx, 0)
         return dict.__getitem__(self, idx)
@@ -143,7 +150,7 @@ def stationary(Mat, epsilon=0.0001):
 
     # Due to floating point imprecision, need to use epsilon values!
     index = np.nonzero(abs(values - 1.0) < epsilon)
-    q = vectors[:,index]
+    q = vectors[:, index]
 
     return q / np.sum(q)  # convert into probability distribution
 
@@ -175,9 +182,9 @@ def invertMatrixTheorem(A, Ainv, indx):
     w[indx] = 0
 
     R1 = T.dot(w)
-    R1.shape = (n,1)
+    R1.shape = (n, 1)
     R2 = u.T.dot(T)
-    R2.shape = (1,n)
+    R2.shape = (1, n)
 
     R = T - R1.dot(R2) / (1 + R2.dot(w))
 
@@ -190,12 +197,16 @@ def invertMatrixTheorem(A, Ainv, indx):
 
 def clean(w):
     '''
-    Given a word, removes all non-alphabetic starting/ending characters. It
-    then proceeds to check if remaining characters are alphabetic. If so,
-    return those characters. If not, returns None
+    Given a word, removes all non-alphabetic starting/ending characters.
+    Returns None when the word is empty (consists of purely non-alphabetic characters).
     '''
-    # TODO(nautilik)
-    return w
+    r = regex.sub('', w)
+    return r if r != '' else None
+
+
+def thresholdCosineSim(v1, v2, threshold=0.01):
+    score = cosineSim(v1, v2)
+    return 0 if score < threshold else score
 
 
 def cosineSim(v1, v2):
@@ -211,15 +222,15 @@ def cosineSim(v1, v2):
 def tf_idf(sentence):
     '''
     Given a sentence, converts the sentence to a TF-IDF representations. The
-    representation is parse, with the key being the term.
+    representation is sparse, with the key being the term.
     '''
     v1 = MyCounter()
-    # TODO(nautilik): Need to avoid stop words, non-english words, etc.
     for word in sentence:
         # Remove starting/ending punctuations/spaces
         # Make sure whatever is left is an english word
-        cleanWord = clean(word)
-        if cleanWord is not None:
-            v1[cleanWord.lower()] += 1
+        if word not in englishStops:
+            cleanWord = clean(word)
+            if cleanWord is not None:
+                v1[cleanWord.lower()] += 1
 
     return v1
