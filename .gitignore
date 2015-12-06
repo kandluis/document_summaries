@@ -74,3 +74,6 @@ cs182_data/
 
 # Ignore iPython Notebook checkpoints
 *.ipynb_checkpoints
+
+# Need to ignore temporary files
+~*

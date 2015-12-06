@@ -90,9 +90,8 @@ def grasshopper(W, r, lamb, k, epsilon=0.0000001):
          # Compute the inverse of the fundamental matrix!
         N = np.linalg.inv(
             np.identity(len(nonAbsorbed)) - hatP[nonAbsorbed, nonAbsorbed])
-
         # Compute the expected visit counts
-        nuvisit = np.sum(N, axis=0)
+        nuvisit = np.sum(N, axis=1)
         nvisit = np.zeros(n)
         nvisit[nonAbsorbed] = nuvisit
 
@@ -102,6 +101,7 @@ def grasshopper(W, r, lamb, k, epsilon=0.0000001):
         # Store the results
         absorbed.append(absorbState)
         probs.append(absorbVisit)
+
         nonAbsorbed.remove(absorbState)
 
     # Return the results!
