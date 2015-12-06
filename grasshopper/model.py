@@ -7,12 +7,11 @@ Authors:
 Luis Perez (luis.perez.live@gmail.com)
 Kevin Eskici (keskici@college.harvar.edu)
 '''
-from shared.utils import tf_idf, cosineSim
-from shared.utils import clean, stationary, invertMatrixTheorem
+from shared import utils
 import numpy as np
 
 
-def docToMatrix(D, vec_fun=tf_idf, sim_fun=cosineSim):
+def docToMatrix(D, vec_fun=utils.frequency, sim_fun=utils.cosineSim):
     '''
     Given a document d which consists of a set of sentences, converts it into a
     |D|_s x |D|_s matrix with weights given by the specified similarity
@@ -22,7 +21,7 @@ def docToMatrix(D, vec_fun=tf_idf, sim_fun=cosineSim):
     # Convert sentences to vector representations!
     sentenceVectors = [vec_fun(s) for s in D]
 
-    # Compute similaliry
+    # Compute similarity
     n = len(D)
     M = np.zeros((n, n))
     for i in range(n):
@@ -31,7 +30,7 @@ def docToMatrix(D, vec_fun=tf_idf, sim_fun=cosineSim):
     return M
 
 
-def grasshopper(W, r, lamb, k, epsilon=0.0001):
+def grasshopper(W, r, lamb, k, epsilon=0.0000001):
     '''
     Implements the Grasshopper algorithm described in the following paper:
     Improving Diversity in Ranking Using Absorbing Random Walks:
@@ -50,9 +49,9 @@ def grasshopper(W, r, lamb, k, epsilon=0.0001):
         k: return the top k items as ranked by Grasshopper
 
     OUTPUT
-        res: a list of (index, prob) of length k, where index corresponds to
+        res: a list of (index, steps) of length k, where index corresponds to
         the index in the input graph, and prob is the probability assigned to
-        it when selected.
+        it when selected. The first element contains prob rather than steps.
 
     The algorithm is modified to take advantage of the fact that we only care
     about the expected number of states.
@@ -67,7 +66,7 @@ def grasshopper(W, r, lamb, k, epsilon=0.0001):
 
     # Normalize the rows of W to create the transition matrix P'
     P = W / np.sum(W, axis=1)
-    hatP = lamb * P - (1 - lamb) * r
+    hatP = lamb * P + (1 - lamb) * r
 
     assert hatP.shape == (n, m)  # Shape should not change!
 
@@ -77,14 +76,10 @@ def grasshopper(W, r, lamb, k, epsilon=0.0001):
     probs = []
 
     # Calculate the most probable state!
-    q = stationary(hatP)
+    q = utils.stationary(hatP)
     absorbed.append(np.argmax(q))
     probs.append(np.max(q))
     nonAbsorbed.remove(np.argmax(q))
-
-    # Compute the inverse of the fundamental matrix!
-    N = np.linalg.inv(
-        np.identity(len(nonAbsorbed)) - hatP[nonAbsorbed, nonAbsorbed])
 
     # Pick the ramaining k-1 items by picking out the most-visited node one by
     # one. once picked out, the item turns into an absorbing node.
@@ -92,6 +87,9 @@ def grasshopper(W, r, lamb, k, epsilon=0.0001):
         # Compute expected number fo times each node will be visited before
         # random walk is absorbed by absorbing nodes. Averaged over all start
         # nodes.
+         # Compute the inverse of the fundamental matrix!
+        N = np.linalg.inv(
+            np.identity(len(nonAbsorbed)) - hatP[nonAbsorbed, nonAbsorbed])
 
         # Compute the expected visit counts
         nuvisit = np.sum(N, axis=0)
@@ -104,15 +102,6 @@ def grasshopper(W, r, lamb, k, epsilon=0.0001):
         # Store the results
         absorbed.append(absorbState)
         probs.append(absorbVisit)
-
-        # Compute the inverse using the matrix inversion theorem
-        # Compute the index of the absorbedState in relation to the submatrix Q
-        # (see paper for details)
-        index = np.nonzero(abs(nonAbsorbed - absorbState) < epsilon)
-        N = invertMatrixTheorem(np.identity(
-            len(nonAbsorbed)) - hatP[nonAbsorbed, nonAbsorbed], N, index)
-
-        # Update the nonAbsorbed states
         nonAbsorbed.remove(absorbState)
 
     # Return the results!

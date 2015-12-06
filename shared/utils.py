@@ -13,10 +13,10 @@ from collections import Counter
 import numpy as np
 import re
 from nltk.corpus import stopwords
+import nltk.stem
 
-# Global variables to improve performance on common words.
-englishStops = stopwords.words('english')
 regex = re.compile('[^a-zA-Z]')
+myStopwords = set(stopwords.words('english'))
 
 
 class MyCounter(Counter):
@@ -139,7 +139,7 @@ class MyCounter(Counter):
         return sum
 
 
-def stationary(Mat, epsilon=0.0001):
+def stationary(Mat, epsilon=0.000001):
     '''
     Given numpy matrix Mat, returns the vector s such that sX = s, where s is
     normalized to be a probability distribution.
@@ -147,10 +147,11 @@ def stationary(Mat, epsilon=0.0001):
     We use the linealg package in numpy to take care of this for us.
     '''
     values, vectors = np.linalg.eig(Mat.T)
-
+    # print values, vectors
     # Due to floating point imprecision, need to use epsilon values!
-    index = np.nonzero(abs(values - 1.0) < epsilon)
+    index = np.nonzero(abs(values - 1.0) < epsilon)[0][0]
     q = vectors[:, index]
+    assert(abs((q**2).sum() - 1) < epsilon)
 
     return q / np.sum(q)  # convert into probability distribution
 
@@ -165,26 +166,24 @@ def invertMatrixTheorem(A, Ainv, indx):
     assert(n == m)  # square matrix
 
     # Remove row and compute inverse
-    u = np.zeros(n)
-    u[indx] = -1
+    u = np.zeros(n).reshape((n, 1))
+    u[indx, 0] = -1
 
-    v = A[indx, :]
+    v = A[indx, :].reshape((1, n))
+    v[0, indx] = v[0, indx] - 1
 
-    T1 = v.dot(Ainv)
-    T1.shape = (1, n)
-    T2 = Ainv.dot(u.T)
-    T2.shape = (n, 1)
-    T = Ainv - T2.dot(T1) / (1 + T1.dot(u.T))
+    T1 = v.dot(Ainv).reshape((1, n))
+    T2 = Ainv.dot(u).reshape((n, 1))
+    T = Ainv - T2.dot(T1) / (1 + T1.dot(u))
 
     # Remove column and compute inverse.
-    w = A[:, indx]
-    w.shape = n
-    w[indx] = 0
+    w = A[:, indx].reshape((n, 1))
+    w[indx, 0] = 0
 
     R1 = T.dot(w)
-    R1.shape = (n, 1)
+    # R1.shape = (n, 1)
     R2 = u.T.dot(T)
-    R2.shape = (1, n)
+    # R2.shape = (1, n)
 
     R = T - R1.dot(R2) / (1 + R2.dot(w))
 
@@ -195,18 +194,37 @@ def invertMatrixTheorem(A, Ainv, indx):
     return R
 
 
-def clean(w):
-    '''
-    Given a word, removes all non-alphabetic starting/ending characters.
-    Returns None when the word is empty (consists of purely non-alphabetic characters).
-    '''
-    r = regex.sub('', w)
-    return r if r != '' else None
+def clean(w, stemmer):
+    newW = regex.sub('', w)
+    return stemmer.stem(newW)
 
 
-def thresholdCosineSim(v1, v2, threshold=0.01):
-    score = cosineSim(v1, v2)
-    return 0 if score < threshold else score
+def cleanDocument(D, keepStopwords=False):
+    '''
+    Given a document W consisting of a list of sentences,
+    returns a cleaned version of the document.
+
+    Clean versions contain all lower case and alphabetical words,
+    with stop words removed. Non-alphabetic words are ignored.
+
+    Additionally, it returns a dictionary mapping sentence indexes
+    in the clean document to sentence indexes in the original
+    document.
+    '''
+    res = []
+    resI = 0
+    toRes = {}
+    for i, s in enumerate(D):
+        newS = [clean(w.lower(), nltk.stem.porter.PorterStemmer())
+                for w in s if keepStopwords or w.lower() not in myStopwords]
+
+        newS = filter(lambda x: x != '', newS)
+        if newS != []:
+            res.append(newS)
+            toRes[i] = resI
+            resI += 1
+
+    return res, toRes
 
 
 def cosineSim(v1, v2):
@@ -219,18 +237,17 @@ def cosineSim(v1, v2):
     return nv1 * nv2
 
 
-def tf_idf(sentence):
+def threshHoldCosineSim(v1, v2, threshold=0.01):
+    r = cosineSim(v1, v2)
+    return 0 if r < threshold else r
+
+
+def frequency(sentence):
     '''
-    Given a sentence, converts the sentence to a TF-IDF representations. The
-    representation is sparse, with the key being the term.
+    Very simple frequency count by words in sentence.
     '''
     v1 = MyCounter()
     for word in sentence:
-        # Remove starting/ending punctuations/spaces
-        # Make sure whatever is left is an english word
-        if word not in englishStops:
-            cleanWord = clean(word)
-            if cleanWord is not None:
-                v1[cleanWord.lower()] += 1
+        v1[word] += 1
 
     return v1
