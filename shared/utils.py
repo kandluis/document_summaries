@@ -250,7 +250,7 @@ def cosineSim(v1, v2):
 
 def threshHoldCosineSim(v1, v2, threshold=0.01):
     r = cosineSim(v1, v2)
-    return 0 if r < threshold else r
+    return 0. if r < threshold else 1.
 
 
 def absoluteWordFrequencies(D):
