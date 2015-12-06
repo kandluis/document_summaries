@@ -1,3 +1,9 @@
+Multi-Document Text Summarization
+=======
+[Kevin Eskici](mailto:keskici@college.harvard.edu) and [Luis A.
+Perez](mailto:luisperez@college.harvard.edu), Harvard University
+
+
 Project Topic
 =============
 
@@ -41,3 +47,85 @@ We expect the following tools to be useful when interpreting unstructured text.
 -   [Stanford CoreNLP Tools](http://nlp.stanford.edu/software/corenlp.shtml)
 
 [1] We do not expect to have the time to generalize to multiple languages, though from a quick search in the literature, multi-language summarization is an active area of research. It lies somewhat outside the scope of our project, however.
+
+
+Problem Statement
+=================
+
+The problem has been redefined slightly, as we’re now taking an extractive approach to textual summarization. We will be using the NLTK Python Library ([NLTK API](http://www.nltk.org/api/nltk.html)) along with the accompanying texts ([Link to Corpus Data](http://www.nltk.org/nltk_data/)). The reason for this decision is that the library is readily available and provides us with many natural language processing features that we would rather not implement.
+
+Baseline
+========
+
+An important step in the project, on which we’re still working on but are hoping to have done soon is to establish a baseline against which we can compare the results of more advanced algorithms. Our proposed baseline procedure is below.
+
+We begin our approach by first defining the function \(|\cdot|_s : \mathbb{D} \to \mathbb{N}^+\) as the length of the document \(D\) in terms of number of sentences (similarly \(|\cdot|_w\) for the number of words), where \(\mathbb{D}\) is the space of documents. Let \(\mathbb{S}\) be the state of possible sentences, and \(\mathbb{W}\) the state of our vocabulary words. Then define an extractive summary, \(\mathcal{S}\), for a documented \(D\),as an ordered collection of the most “important” sentences \(\{s_i\}_{i=1}^k\). We have that \(k\) is a parameter selected by the user with \(1 \leq k \leq |D|\).
+
+With the above set-up, we now present our proposed baseline by making note of some intuitive features about sentences.
+
+-   We note that the importance of a sentence, defined as a function \(i_s: \mathbb{S} \to [0,1]\). The importance of a sentence, naively, depends on the importance of the words in the sentence, so we can imagine that \(i = f \circ i_w \circ g\) where \(i_w: \mathbb{W} \to [0,1]\) is the importance of a single word. Note that all of the importance functions have codomain that is normalized, though they are not strictly probability distributions.
+
+-   As per discussion in the literature , the importance of a sentence also depends on the location of the sentence relative to the body of work. Very naively, we modify \(i_s' = \mathbb{S} \times \mathbb{N} \to [0,1]\) as the extension of \(i_s\) to the space containing indexed locations.
+
+-   As for the importance of a word, we simply measure the number of times the word occurs in our body of work. \[i_w(w) = \frac{\text{count}_D(w)}{|D|_w}\]
+
+-   Putting the above ideas together, we define the importance of a sentence as \[i'_s(s,i) = \sum_{w \in s} i_w(w)\] where we normalize the results after calculating them by dividing by: \(\sum_{(s',i') \in D - \{w\}} i'_s(s',i')\).
+
+-   The last idea involves a further modification to the calculation of the sentence score. Suppose we have selected the set of sentences \(\{s_i\}_{i=1}^m\) for our summary, and are looking to select a further sentence \(s_{m+1}\). In order to calculate the score of the sentences, we consider the new word space \(\mathbb{W'} = \mathbb{W} \setminus A\) where \(A = \bigcup_{i=1}^k A_i\) with \(A_i = \{w \mid w \in s_i\}\). The idea here being that we do not want to double count words that have already been selected!
+
+-   The final item is that we break ties at random.
+
+Current Work
+============
+
+Challenges
+----------
+
+We’ve struggled with finding a good source of training data for our model, as has been highlighted above. In the weeks up to this update, we’ve spent most of our time researching current models. We’ve actually diverged from our original plan of utilizing an HMM due to the lack-luster results we’ve found in other papers (after further research). However, we’ve stayed true to the idea of making use of Markov Models by researching the Grasshopper algorithm (see Section [sec:grasshopper]). Additionally, the lack of good training data (it’s surprising that papers don’t provide their source code/data along with the paper itself) has led us to instead attempt an unsupervised approach to the problem.
+
+Implementation of Baselines
+---------------------------
+
+The baselines are not yet implemented, as of the writing of this update.
+
+Implementation of Grasshopper Algorithm
+---------------------------------------
+
+The Grasshopper algorithm is described in the has been implemented. We now present a brief overview of this algorithm so the discussion in the Section [sec:future<sub>w</sub>ork] section makes sense.
+
+-   Grasshopper creates a Markov model of the given document. Each sentence is represented as a node in the graph, with edges to all other sentence with weight \(w_{ij}\) which is dependent on the cosine similarity between sentence \(i\) and sentence \(j\). We plan to use TF-IDF vectors for each sentence. Note that a sparce graph is enforced by using a \(0.1\) thresh-hold for any edge weight.
+
+-   We further modify \(w_{ij}\) by taking into account the prior \(r\), over the sentence importance, which serves to weigh some edges more heavily than others.
+
+-   Grasshopper then finds the steady state of this Markov model.
+
+-   From the steady state, the state with the largest probability distribution (\(s_{max}\)) is selected.
+
+-   The graph is then modified to change the state \(s_{max}\) into an absorption state.
+
+-   Repeat the the above steps (excluding the first) until a total of \(k\) sentences are extracted, as specified by the user.
+
+The algorithm is relatively simple. Example output for ca19 from the Brown Corpus in NLTK is now presented. We use a weight parameter \(\lambda\) on the prior of \(0\), along with simple word-count sentence vectors. Note that we’ve yet to implement the removal of stopwords, etc., and the below is completely preliminary in results.
+
+> Howard E. Simpson , the railroad’s president , said , “ A drastic decline in freight loading due principally to the severe slump in the movement of heavy goods has necessitated this regrettable action ” . Since the railroad cannot reduce the salary of individual union members under contract , it must accomplish its payroll reduction by placing some of the men on furlough , a B. & O. spokesman said . The proposal was made by Dr. David S. Jenkins after he and Mrs. D. Ellwood Williams , Jr. , a board member and long-time critic of the superintendent , argued for about fifteen minutes at this week’s meeting . Cites discrepancies Soon after 10 A.M. , when police reached the 1-1/2-story brick home in the Franklin Manor section , 15 miles south of here on the bay , in response to a call from the Dresbach’s other son , Lee , 14 , they found Mrs. Dresbach’s body on the first-floor bedroom floor .
+
+Implementation of TextRank
+--------------------------
+
+Another approach we are exploring is using the TextRank algorithm described in . At this time we have a simple implementation running for single document extractive summarization (example below). Key to the results is the similarity function used to compute edge weights between sentences. For starters we used the one described in the paper where the similarity score was a function of sentence lengths and the number of words they had in common (filtering out non Nouns, Adjectives, and Verbs).
+
+Example output for ca19 from the Brown Corpus in NLTK:
+
+> The Baltimore and Ohio Railroad announced yesterday it would reduce the total amount of its payroll by 10 per cent through salary cuts and lay-offs effective at 12:01 A.M. next Saturday. Howard E. Simpson , the railroad’s president, said,“ A drastic decline in freight loading due principally to the severe slump in the movement of heavy goods has necessitated this regrettable action”.A thug struck a cab driver in the face with a pistol last night after robbing him of $18 at Franklin and Mount Streets . The victim , Norman B. Wiley , 38 , of the 900 block North Charles Street , was treated for cuts at Franklin Square Hospital after the robbery . A baby was burned to death and two other children were seriously injured last night in a fire which damaged their one-room Anne Arundel county home.
+
+Future Work
+-----------
+
+The first step is to implement tests. While some of our current results appear promising, we plan on using ROUGE along with a yet to be discovered corpus to help us compare our summaries to those of humans (or generated by other machines?).
+
+For the Grasshopper algorithm, once we have found some training data, we plan to utilize the training set to optimize our \(\lambda, \alpha\) parameters to the model. These optimizations can be done through Bayesian Optimization using the [Spearmint](https://github.com/HIPS/Spearmint). Following the suggestions in , we also plan to to generalize the grasshopper algorithm to consider “partial absorbtion” rather than full absorption, allowing for more variation in our sentence selection. Additionally, when learning the parameters, we plan to utilize different forms of priors \(r\) based on textual analysis of the documents. We will compare these results to those that we’ve achieved thus far and select the most optimal model. Lastly, we might look into changes the \(0.1\) threshold used above to enforce sparsity.
+
+For TextRank, we believe results can be greatly increased by exploring different similarity functions. Additionally the algorithm as presented in the paper does not seem well suited for selecting orthogonal sentences in a text, so we may explore variants that take this into account. One idea would be to run the algorithm to get our top sentence, and then rerun filtering out keywords in that sentence, and repeating until the desired number of sentences has been extracted.
+
+Before optimizing these algorithms and extending them to multi document summerization, our focus will be to implement tests as described above so we can track results as we go.
+

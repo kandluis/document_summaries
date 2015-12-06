@@ -64,10 +64,13 @@ target/
 *.out
 *.pdf
 *.synctex.gz
-
+*.fls
 
 # Ignore synchronized data folder
 cs182_data/
 
 # Ignore the environment variable (this is local to Luis)
 .env
+
+# Ignore iPython Notebook checkpoints
+*.ipynb_checkpoints
