@@ -1,3 +1,6 @@
+=== Set Up ===
+
+
 Multi-Document Text Summarization
 =======
 [Kevin Eskici](mailto:keskici@college.harvard.edu) and [Luis A.

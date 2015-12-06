@@ -1,5 +1,7 @@
 '''
-Main entry point for our text summarization Grasshopper.
+Main entry point for our text summarization Grasshopper Algorithm.
+
+This module contains functions pertaining specifically to Grasshopper.
 
 Copyright, 2015.
 
