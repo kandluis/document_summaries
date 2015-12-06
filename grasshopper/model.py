@@ -19,7 +19,7 @@ def docToMatrix(D, vec_fun=utils.frequency, sim_fun=utils.cosineSim):
     representation as output by the vec_fun.
     '''
     # Convert sentences to vector representations!
-    sentenceVectors = [vec_fun(s) for s in D]
+    sentenceVectors = vec_fun(D)
 
     # Compute similarity
     n = len(D)

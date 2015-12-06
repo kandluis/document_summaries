@@ -139,7 +139,7 @@ class MyCounter(Counter):
         return sum
 
 
-def stationary(Mat, epsilon=0.000001):
+def stationary(Mat, epsilon=0.01):
     '''
     Given numpy matrix Mat, returns the vector s such that sX = s, where s is
     normalized to be a probability distribution.
@@ -147,9 +147,9 @@ def stationary(Mat, epsilon=0.000001):
     We use the linealg package in numpy to take care of this for us.
     '''
     values, vectors = np.linalg.eig(Mat.T)
-    # print values, vectors
-    # Due to floating point imprecision, need to use epsilon values!
-    index = np.nonzero(abs(values - 1.0) < epsilon)[0][0]
+    index = np.nonzero((abs(np.real(values) - 1.0) < epsilon) &
+                       (abs(np.imag(values)) < epsilon))[0][0]
+    # print values
     q = vectors[:, index]
     assert(abs((q**2).sum() - 1) < epsilon)
 
@@ -199,6 +199,16 @@ def clean(w, stemmer):
     return stemmer.stem(newW)
 
 
+def decayDistribution(alpha, l):
+    dist = np.array([i**(-alpha) for i in range(1, l + 1)])
+    return dist / dist.sum()
+
+
+def expDecayDistribution(alpha, l):
+    dist = np.array([alpha**i for i in range(l)])
+    return dist / dist.sum()
+
+
 def cleanDocument(D, keepStopwords=False):
     '''
     Given a document W consisting of a list of sentences,
@@ -242,12 +252,68 @@ def threshHoldCosineSim(v1, v2, threshold=0.01):
     return 0 if r < threshold else r
 
 
-def frequency(sentence):
-    '''
-    Very simple frequency count by words in sentence.
-    '''
-    v1 = MyCounter()
-    for word in sentence:
-        v1[word] += 1
+def absoluteWordFrequencies(D):
+    # Count frequencies of terms
+    c = MyCounter()
+    for s in D:
+        for w in s:
+            c[w] += 1
 
-    return v1
+    return c
+
+
+def frequency(D, normalized=False):
+    '''
+    Given a documents, converts it to a matrix of sentence vectors.
+    '''
+    # Count frequencies of terms
+    freqs = absoluteWordFrequencies(D)
+    if normalized:
+        freqs.normalize()
+
+    # Construct vectors
+    res = []
+    for s in D:
+        v = MyCounter()
+        for w in s:
+            v[w] = freqs[w]
+        res.append(v)
+
+    return res
+
+
+def logFrequency(D):
+    '''
+    Scales logarithmically
+    '''
+    res = frequency(D)
+    for i in range(len(res)):
+        for w in res[i]:
+            res[i][w] = 1 + np.log(res[i][w])
+
+    return res
+
+
+def booleanFrequencies(D):
+    '''
+    Vectors are binary, 1/0 if term occurs.
+    '''
+    res = []
+    for s in D:
+        v = MyCounter()
+        for w in s:
+            v[w] = 1
+        res.append(v)
+
+    return res
+
+
+def IDF(t, corpus):
+    N = float(len(corpus))
+    containedIn = 1.
+    for D in corpus:
+        freqs = booleanFrequencies(D)
+        if t in freqs:
+            containedIn += 1.
+
+    return np.log(N / containedIn)
