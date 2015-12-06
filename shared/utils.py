@@ -5,7 +5,7 @@ Copyright, 2015.
 
 Authors:
 Luis Perez (luis.perez.live@gmail.com)
-Kevin Eskici (keskici@college.harvar.edu)
+Kevin Eskici (keskici@college.harvard.edu)
 
 Harvard University.
 '''
@@ -21,6 +21,7 @@ myStopwords = set(stopwords.words('english'))
 
 class MyCounter(Counter):
     """
+    Adapted from Berkley Packman Framework
     A myCounter keeps track of counts for a set of keys.
 
     The myCounter class is an extension of the the standard Counter class.
