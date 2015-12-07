@@ -257,7 +257,7 @@ def cleanDocument(D, keepStopwords=False):
         newS = filter(lambda x: x != '', newS)
         if newS != []:
             res.append(newS)
-            toRes[i] = resI
+            toRes[resI] = i
             resI += 1
 
     return res, toRes
