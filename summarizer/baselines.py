@@ -32,7 +32,7 @@ def geomPriorBaseline(D, k, p = 0.02):
 	probs = probs/sum(probs)
 	summary = np.random.choice(xrange(len(sentences)),size = summary_size, 
 		replace = False, p= probs)
-	return [D[sent] for sent in [mapping[i] for i in summary]]
+	return [D[mapping[i]] for i in summary_sents]
 
 def modifiedGeomPriorBaseline(D, k, p = 0.02):
 	D = concatDocs(D)
@@ -42,7 +42,7 @@ def modifiedGeomPriorBaseline(D, k, p = 0.02):
 	summary = np.random.choice(xrange(1, len(sentences)),size = summary_size,
 	 replace = False, p=probs)
 	summary = np.append(0, summary)
-	return [D[sent] for sent in [mapping[i] for i in summary]]
+	return [D[mapping[i]] for i in summary_sents]
 
 def wordFreqBaseline(D, k):
 	D = concatDocs(D)
@@ -64,4 +64,4 @@ def wordFreqBaseline(D, k):
 	    summary.append(selected)
 	    summary_words = summary_words.union(sentences[selected])
 
-	return [D[sent] for sent in [mapping[i] for i in summary]]
+	return [D[mapping[i]] for i in summary_sents]
