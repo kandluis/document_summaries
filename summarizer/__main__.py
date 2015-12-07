@@ -114,7 +114,7 @@ def run(opts):
 
     inbase = os.path.join(base, 'docs')
     for folder in os.listdir(inbase):
-        inpath = inbase + folder
+        inpath = os.path.join(inbase, folder)
         try:
             createSummaries(algorithm, inpath, outpath, multiDocument=True)
         except Exception as e:
