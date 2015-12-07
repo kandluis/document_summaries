@@ -113,7 +113,9 @@ def run(opts):
         os.makedirs(outpath)
 
     inbase = os.path.join(base, 'docs')
-    for folder in os.listdir(inbase):
+    folders = dirs = [d for d in os.listdir(
+        inbase) if os.path.isdir(os.path.join(inbase, d))]
+    for folder in folders:
         inpath = os.path.join(inbase, folder)
         try:
             createSummaries(algorithm, inpath, outpath, multiDocument=True)
