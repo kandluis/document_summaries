@@ -29,7 +29,7 @@ def concatDocs(D):
 def geomPriorBaseline(D, k, p=0.02):
     D = concatDocs(D)
     sentences, mapping = utils.cleanDocument(D)
-    probs = np.array([geom(geom_p, i) for i in xrange(len(sentences))])
+    probs = np.array([geom(p, i) for i in xrange(len(sentences))])
     probs = probs / sum(probs)
     summary = np.random.choice(xrange(len(sentences)), size=k,
                                replace=False, p=probs)
@@ -39,7 +39,7 @@ def geomPriorBaseline(D, k, p=0.02):
 def modifiedGeomPriorBaseline(D, k, p=0.02):
     D = concatDocs(D)
     sentences, mapping = utils.cleanDocument(D)
-    probs = np.array([geom(geom_p, i) for i in xrange(1, len(sentences))])
+    probs = np.array([geom(p, i) for i in xrange(1, len(sentences))])
     probs = probs / sum(probs)
     summary = np.random.choice(xrange(1, len(sentences)), size=k,
                                replace=False, p=probs)

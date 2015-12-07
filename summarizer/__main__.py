@@ -78,6 +78,13 @@ def parseArgs(parser):
                       " summaries are saved under the DATA_DIR/ALGORITHM/" +
                       " directory if a data_dir parameter is provided." +
                       "Current options are {}".format(argsToAlgo.keys()))
+    parser.add_option("-s", "--rouge_score", default=False,
+                      help="The paremeter is ignored in the case where DATA_DIR " +
+                      "is not set. Otherwise, if ROUGE_SCORE, then the model " +
+                      "and system summaries are scored using the ROUGE metrics " +
+                      "and results are printed to STDOUT.")
+    parser.add_option("--debug", default=False,
+                      help="Prints helpful debugging information.")
 
 
 def run(opts):
@@ -107,8 +114,8 @@ def run(opts):
             createSummaries(algorithm, inpath, outpath, multiDocument=True)
         except Exception as e:
             print "Failed with {}".format(inpath)
-            print traceback.print_exc()
-            raise e
+            if opts.debug:
+                print traceback.print_exc()
 
 
 def main():

@@ -175,7 +175,7 @@ def run_grassHopper(D, k):
 
     # Clean the document
     cleanDoc, mapping = utils.cleanDocument(D)
-    WClean = grasshopper.docToMatrix(
+    WClean = docToMatrix(
         cleanDoc, sim_fun=utils.threshHoldCosineSim)
 
     # According to the paper, alpha = 0.25 and lambda = 0.5 where the
@@ -183,7 +183,7 @@ def run_grassHopper(D, k):
     lamb = 0.5
     alpha = 0.25
     r = utils.decayDistribution(alpha, len(WClean))
-    results = grasshopper.grasshopper(WClean, r, lamb, 5)
+    results = grasshopper(WClean, r, lamb, 5)
 
     # Extract the summary
     summary = []
