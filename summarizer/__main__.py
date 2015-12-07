@@ -71,7 +71,7 @@ def parseArgs(parser):
                       " and model summaries. Summarization documents should be" +
                       " contained in the docs/ subdirectory. See README for" +
                       " details. If no directory is provided, input is streamed" +
-                      " from STDIN and results is output to STDOUT. ROUGE" +
+                      " from STDIN and results are output to STDOUT. ROUGE" +
                       " analysis is not performed.")
     parser.add_option("-a", "--algorithm", default="frequency",
                       help="Algorithm to use for summarization. Output" +
@@ -107,7 +107,7 @@ def run(opts):
     if not os.path.exists(outpath):
         os.makedirs(outpath)
 
-    inbase = base + '/docs/'
+    inbase = os.path.join(base, 'docs')
     for folder in os.listdir(inbase):
         inpath = inbase + folder
         try:
