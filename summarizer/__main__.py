@@ -96,7 +96,7 @@ def run(opts):
     if base is None:
         raise Exception(
             "You must provided a DATA_DIR. STDIN currently not supported.")
-    outpath = base + opts.algorithm
+    outpath = os.path.join(base, opts.algorithm)
     try:
         algorithm = argsToAlgo[opts.algorithm.lower()]
     except KeyError:
