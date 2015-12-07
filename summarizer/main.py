@@ -6,7 +6,23 @@ Copyright, 2015.
 Authors:
 Luis Perez (luis.perez.live@gmail.com)
 Kevin Eskici (keskici@college.harvar.edu)
+
+For full operation, run as follows:
+    data_dir='/home/luis/Dropbox/OnlineDocuments/HarvardSchoolWork/Fall2015/cs182/project/cs182_data/rouge_data/'
+
 '''
+from optparse import OptionParser
+from . import grasshopper
+from . import baselines
+
+# Dictionary mapping algorithm commandline parameters to
+# their respective algorithm classes.
+argsToAlgo = {
+    'grasshopper':   grasshopper.run_grassHopper,
+    'geomPrior':   baselines.geomPriorBaseline,
+    'firstGeomPrior':   baselines.modifiedGeomPriorBaseline,
+    'frequency':   baselines.wordFreqBaseline
+}
 
 
 def createSummaries(sum_algo, abs_path, out_path, k=5, multiDocument=False):
@@ -46,8 +62,16 @@ def createSummaries(sum_algo, abs_path, out_path, k=5, multiDocument=False):
                     out.write("{}.\n".format(s.strip()))
 
 
-def run:
-    base = '/home/luis/Dropbox/OnlineDocuments/HarvardSchoolWork/Fall2015/cs182/project/cs182_data/rouge_data/'
+def parseArgs(parser):
+    parser.add_option("-d", "--data_dir", default=None,
+                      help="Base Directory Containing Rouge Data")
+
+
+def run(opts):
+    '''
+    Runs our summarization software based on user options.
+    '''
+    base = opts.data_dir
     outpath = base + 'grass_out'
     inbase = base + 'docs/'
     for folder in os.listdir(inbase):
@@ -56,3 +80,18 @@ def run:
             createSummaries(grassHopper, inpath, outpath, multiDocument=True)
         except:
             print "Failed with {}".format(inpath)
+
+
+def main():
+    '''
+    Main program
+    '''
+
+    parser = OptionParser()
+    getArgs(parser)
+    options, args = parser.parse_args()
+    run(options)
+
+
+if __name__ == '__main__':
+    main()

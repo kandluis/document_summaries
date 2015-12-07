@@ -11,7 +11,7 @@ Authors:
 Luis Perez (luis.perez.live@gmail.com)
 Kevin Eskici (keskici@college.harvard.edu)
 '''
-from shared import utils
+from . import utils
 import numpy as np
 
 
