@@ -9,8 +9,63 @@ Authors:
 Luis Perez (luis.perez.live@gmail.com)
 Kevin Eskici (keskici@college.harvar.edu)
 '''
-from shared import utils
+from . import utils
 import numpy as np
+
+
+def stationary(Mat, epsilon=0.01):
+    '''
+    Given numpy matrix Mat, returns the vector s such that sX = s, where s is
+    normalized to be a probability distribution.
+    So we have sX = sI -> s(X-I) = 0, so we need to find ker(X-I).
+    We use the linealg package in numpy to take care of this for us.
+    '''
+    values, vectors = np.linalg.eig(Mat.T)
+    index = np.nonzero((abs(np.real(values) - 1.0) < epsilon) &
+                       (abs(np.imag(values)) < epsilon))[0][0]
+    # print values
+    q = vectors[:, index]
+    assert(abs((q**2).sum() - 1) < epsilon)
+
+    return q / np.sum(q)  # convert into probability distribution
+
+
+def invertMatrixTheorem(A, Ainv, indx):
+    '''
+    Computes the inverse of a matrix with one row and column removed using
+    the matrix inversion lemma. It needs a matrix A, the inverse of A,
+    and the row and column index which needs to be removed.
+    '''
+    n, m = A.shape
+    assert(n == m)  # square matrix
+
+    # Remove row and compute inverse
+    u = np.zeros(n).reshape((n, 1))
+    u[indx, 0] = -1
+
+    v = A[indx, :].reshape((1, n))
+    v[0, indx] = v[0, indx] - 1
+
+    T1 = v.dot(Ainv).reshape((1, n))
+    T2 = Ainv.dot(u).reshape((n, 1))
+    T = Ainv - T2.dot(T1) / (1 + T1.dot(u))
+
+    # Remove column and compute inverse.
+    w = A[:, indx].reshape((n, 1))
+    w[indx, 0] = 0
+
+    R1 = T.dot(w)
+    # R1.shape = (n, 1)
+    R2 = u.T.dot(T)
+    # R2.shape = (1, n)
+
+    R = T - R1.dot(R2) / (1 + R2.dot(w))
+
+    # Remove redundant rows
+    R = np.delete(R, (indx), axis=0)
+    R = np.delete(R, (indx), axis=1)
+
+    return R
 
 
 def docToMatrix(D, vec_fun=utils.frequency, sim_fun=utils.cosineSim):
@@ -78,7 +133,7 @@ def grasshopper(W, r, lamb, k, epsilon=0.0000001):
     probs = []
 
     # Calculate the most probable state!
-    q = utils.stationary(hatP)
+    q = stationary(hatP)
     absorbed.append(np.argmax(q))
     probs.append(np.max(q))
     nonAbsorbed.remove(np.argmax(q))
@@ -108,3 +163,31 @@ def grasshopper(W, r, lamb, k, epsilon=0.0000001):
 
     # Return the results!
     return zip(absorbed, probs)
+
+
+def run_grassHopper(D, k):
+    '''
+    Runs the optimized grasshopper algorithm.
+
+    This is the main API for the Grasshopper algorithms.
+    '''
+    D = [s for d in D for s in d]
+
+    # Clean the document
+    cleanDoc, mapping = utils.cleanDocument(D)
+    WClean = grasshopper.docToMatrix(
+        cleanDoc, sim_fun=utils.threshHoldCosineSim)
+
+    # According to the paper, alpha = 0.25 and lambda = 0.5 where the
+    # best parameters
+    lamb = 0.5
+    alpha = 0.25
+    r = utils.decayDistribution(alpha, len(WClean))
+    results = grasshopper.grasshopper(WClean, r, lamb, 5)
+
+    # Extract the summary
+    summary = []
+    for (i, p) in sorted(results, key=lambda x: x[0]):
+        summary.append(D[i])
+
+    return summary

@@ -10,9 +10,12 @@ Kevin Eskici (keskici@college.harvard.edu)
 Harvard University.
 '''
 from collections import Counter
+from nltk.corpus import stopwords
+from bs4 import BeautifulSoup as BSHTML
+
 import numpy as np
 import re
-from nltk.corpus import stopwords
+import os
 import nltk.stem
 
 regex = re.compile('[^a-zA-Z]')
@@ -139,65 +142,9 @@ class MyCounter(Counter):
             sum += x[key] * y[key]
         return sum
 
-
-def stationary(Mat, epsilon=0.01):
-    '''
-    Given numpy matrix Mat, returns the vector s such that sX = s, where s is
-    normalized to be a probability distribution.
-    So we have sX = sI -> s(X-I) = 0, so we need to find ker(X-I).
-    We use the linealg package in numpy to take care of this for us.
-    '''
-    values, vectors = np.linalg.eig(Mat.T)
-    index = np.nonzero((abs(np.real(values) - 1.0) < epsilon) &
-                       (abs(np.imag(values)) < epsilon))[0][0]
-    # print values
-    q = vectors[:, index]
-    assert(abs((q**2).sum() - 1) < epsilon)
-
-    return q / np.sum(q)  # convert into probability distribution
-
-
-def invertMatrixTheorem(A, Ainv, indx):
-    '''
-    Computes the inverse of a matrix with one row and column removed using
-    the matrix inversion lemma. It needs a matrix A, the inverse of A,
-    and the row and column index which needs to be removed.
-    '''
-    n, m = A.shape
-    assert(n == m)  # square matrix
-
-    # Remove row and compute inverse
-    u = np.zeros(n).reshape((n, 1))
-    u[indx, 0] = -1
-
-    v = A[indx, :].reshape((1, n))
-    v[0, indx] = v[0, indx] - 1
-
-    T1 = v.dot(Ainv).reshape((1, n))
-    T2 = Ainv.dot(u).reshape((n, 1))
-    T = Ainv - T2.dot(T1) / (1 + T1.dot(u))
-
-    # Remove column and compute inverse.
-    w = A[:, indx].reshape((n, 1))
-    w[indx, 0] = 0
-
-    R1 = T.dot(w)
-    # R1.shape = (n, 1)
-    R2 = u.T.dot(T)
-    # R2.shape = (1, n)
-
-    R = T - R1.dot(R2) / (1 + R2.dot(w))
-
-    # Remove redundant rows
-    R = np.delete(R, (indx), axis=0)
-    R = np.delete(R, (indx), axis=1)
-
-    return R
-
-
-def clean(w, stemmer):
-    newW = regex.sub('', w)
-    return stemmer.stem(newW)
+'''
+Distribution Functions
+'''
 
 
 def decayDistribution(alpha, l):
@@ -208,6 +155,84 @@ def decayDistribution(alpha, l):
 def expDecayDistribution(alpha, l):
     dist = np.array([alpha**i for i in range(l)])
     return dist / dist.sum()
+
+
+'''
+Summary cleaning functions
+'''
+
+
+def cleanMultiDocModelSummaries(dir):
+    '''
+    Given a directory containing model summaries for DUC 2003,
+    parses them into an input expected by our system.
+    '''
+
+    for name in os.listdir(dir):
+        tmp = name.split('.')
+        newName = 'Summary.{}.{}.txt'.format(tmp[0][1:], tmp[-1])
+        newFile = os.path.join(dir, newName)
+        oldFile = os.path.join(dir, name)
+        os.rename(oldFile, newFile)
+
+
+def cleanSingleDocModelSummaries(dir):
+    '''
+    Given a directory containing model summaries for DUC 2003,
+    parses them into the input expected for single document summaries
+    by our system.
+    '''
+    for name in os.listdir(dir):
+        tmp = name.split('.')
+        ID = tmp[0][1:]
+        Person = tmp[4]
+        DOCID = tmp[-2][3:] + tmp[-1]
+        newName = 'Summary.{}{}.{}.txt'.format(ID, DOCID, Person)
+        newFile = os.path.join(dir, newName)
+        oldFile = os.path.join(dir, name)
+        os.rename(oldFile, newFile)
+
+
+def cleanOriginalDocs(dir):
+    '''
+    Given a directory containing the set of original documents from the
+    DUC 2003 conference, renames and parses them into the format expected
+    by our system.
+    '''
+    # Rename directories
+    _, dirs, _ = os.walk(dir).next()
+    for subdir in dirs:
+        ID = subdir[1:-1]
+        newDir = os.path.join(dir, ID)
+        oldDir = os.path.join(dir, subdir)
+        os.rename(oldDir, newDir)
+
+        for name in os.listdir(newDir):
+            # Rename the documents themselves
+            tmp = name.split('.')
+            fielID = tmp[0][3:] + tmp[1] + '.txt'
+            newFile = os.path.join(newDir, ID)
+            oldFile = os.path.join(newDir, name)
+            os.rename(oldFile, newFile)
+
+            # Extract the text!
+            with open(newFile, 'r') as txt:
+                HTML = BSHTML(txt.read(), 'xml')
+                text = HTML.TEXT.text
+                sentences = [s.replace('\n', '') for s in text.split('. ')]
+                with open(os.path.join(newDir, 'Parsed.' + name), 'w') as f:
+                    for s in sentences:
+                        f.write("{}\n".format(s))
+
+
+'''
+Document Cleaning
+'''
+
+
+def clean(w, stemmer):
+    newW = regex.sub('', w)
+    return stemmer.stem(newW)
 
 
 def cleanDocument(D, keepStopwords=False):
@@ -238,6 +263,11 @@ def cleanDocument(D, keepStopwords=False):
     return res, toRes
 
 
+'''
+Similarity measures
+'''
+
+
 def cosineSim(v1, v2):
     '''
     Note that input vectors are sparse!
@@ -251,6 +281,11 @@ def cosineSim(v1, v2):
 def threshHoldCosineSim(v1, v2, threshold=0.01):
     r = cosineSim(v1, v2)
     return 0. if r < threshold else 1.
+
+
+'''
+Vector representations of sentences.
+'''
 
 
 def absoluteWordFrequencies(D):
