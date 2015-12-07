@@ -14,8 +14,9 @@ from the parent directory.
 import os
 import traceback
 import pyrouge
+import fileinput
 
-from optparse import OptionParser
+import argparse
 from . import grasshopper
 from . import baselines
 from . import textrank
@@ -68,68 +69,77 @@ def createSummaries(sum_algo, abs_path, out_path, k=5, multiDocument=False):
 
 
 def parseArgs(parser):
-    parser.add_option("-d", "--data_dir", default=None,
-                      help="Base Directory containing summarization documents" +
-                      " and model summaries. Summarization documents should be" +
-                      " contained in the docs/ subdirectory. See README for" +
-                      " details. If no directory is provided, input is streamed" +
-                      " from STDIN and results are output to STDOUT. ROUGE" +
-                      " analysis is not performed.")
-    parser.add_option("-a", "--algorithm", default="frequency",
-                      help="Algorithm to use for summarization. Output" +
-                      " summaries are saved under the DATA_DIR/ALGORITHM/" +
-                      " directory if a data_dir parameter is provided." +
-                      "Current options are {}".format(argsToAlgo.keys()) +
-                      "If None is input, the summarization is not run. This is" +
-                      " useful if summaries have been created and you want to" +
-                      " just score them with ROUGE.")
-    parser.add_option("-s", "--rouge_score", default=False,
-                      help="The paremeter is ignored in the case where DATA_DIR " +
-                      "is not set. Otherwise, if ROUGE_SCORE, then the model " +
-                      "and system summaries are scored using the ROUGE metrics " +
-                      "and results are printed to STDOUT.")
-    parser.add_option("--debug", default=False,
-                      help="Prints helpful debugging information.")
+    parser.add_argument("-d", "--data_dir", default=None,
+                        help="Base Directory containing summarization documents" +
+                        " and model summaries. Summarization documents should be" +
+                        " contained in the docs/ subdirectory. See README for" +
+                        " details. If no directory is provided, input is streamed" +
+                        " from STDIN (or provided text file) and results are " +
+                        "output to STDOUT. ROUGE analysis is not performed.")
+    parser.add_argument("-a", "--algorithm", default="frequency",
+                        help="Algorithm to use for summarization. Output" +
+                        " summaries are saved under the DATA_DIR/ALGORITHM/" +
+                        " directory if a data_dir parameter is provided." +
+                        "Current options are {}".format(argsToAlgo.keys()))
+    parser.add_argument("-s", "--rouge_score", default=False,
+                        help="The paremeter is ignored in the case where DATA_DIR " +
+                        "is not set. Otherwise, if ROUGE_SCORE, then the model " +
+                        "and system summaries are scored using the ROUGE metrics " +
+                        "and results are printed to STDOUT.")
+    parser.add_argument("--debug", default=False,
+                        help="Prints helpful debugging information.")
+    parser.add_argument("--summarize", default=True,
+                        help="If true, performs the summarization using the " +
+                        "specified ALGORITHM. Otherwise, does not summarize.")
+    parser.add_argument("-k", "--summary_length", default=5,
+                        help="Sentence length of output summary")
 
 
 def run(opts):
     '''
     Runs our summarization software based on user options.
     '''
-    # TODO(nautilik): stream input from stdin if opts.data_dir is None
-    base = os.path.abspath(opts.data_dir)
-    if base is None:
-        raise Exception(
-            "You must provided a DATA_DIR. STDIN currently not supported.")
-    outpath = os.path.join(base, opts.algorithm)
-    try:
-        algorithm = argsToAlgo[opts.algorithm.lower()]
-    except KeyError:
-        raise Exception(
-            "{} is not an available algorithm!".format(opts.algorithm))
-
-    # Create directory if it does not exist
-    if not os.path.exists(outpath):
-        os.makedirs(outpath)
-
-    inbase = os.path.join(base, 'docs')
-    folders = dirs = [d for d in os.listdir(
-        inbase) if os.path.isdir(os.path.join(inbase, d))]
-    for folder in folders:
-        inpath = os.path.join(inbase, folder)
+    base = None if opts.data_dir is None else os.path.abspath(opts.data_dir)
+    debug = opts.debug == 'True'
+    if opts.summarize:
         try:
-            createSummaries(algorithm, inpath, outpath, multiDocument=True)
-        except Exception as e:
-            print "Failed with {}".format(inpath)
-            if opts.debug:
-                print traceback.print_exc()
+            algorithm = argsToAlgo[opts.algorithm.lower()]
+        except KeyError:
+            raise Exception(
+                "{} is not an available algorithm!".format(opts.algorithm))
+
+        k = opts.summary_length
+        if base is None:
+            raise Exception("STDIN currently not supported!")
+
+        # Create directory if it does not exist
+        outpath = os.path.join(base, opts.algorithm)
+        if not os.path.exists(outpath):
+            os.makedirs(outpath)
+
+        inbase = os.path.join(base, 'docs')
+        folders = dirs = [d for d in os.listdir(
+            inbase) if os.path.isdir(os.path.join(inbase, d))]
+        for folder in folders:
+            inpath = os.path.join(inbase, folder)
+            try:
+                createSummaries(algorithm, inpath, outpath,
+                                k=k, multiDocument=True)
+            except Exception as e:
+                print "Failed with {}".format(inpath)
+                if debug == 'True':
+                    print traceback.print_exc()
 
     # If rouge score is input, attempt to score the results with pyrouge
     # Currently only handles multiple documents!
-    if opts.data_dir is not None and opts.rouge_score:
+    if opts.data_dir is not None and opts.rouge_score == 'True':
         r = pyrouge.Rouge155()
-        r.system_dir = os.path.join(opts.data_dir, 'system_multi')
-        r.model_dir = outpath
+        r.system_dir = outpath
+        if debug:
+            print "System Directory: {}.".format(r.system_dir)
+        r.model_dir = os.path.join(base, 'model_multi')
+        if debug:
+            print "Model Directory: {}.".format(r.model_dir)
         r.system_filename_pattern = 'SetSummary.(\d+).txt'
         r.model_filename_pattern = 'SetSummary.#ID#.[A-Z].txt'
 
@@ -143,9 +153,10 @@ def main():
     Main program
     '''
 
-    parser = OptionParser()
+    parser = argparse.ArgumentParser(
+        description="Multi-Document Text Summarizer.")
     parseArgs(parser)
-    options, args = parser.parse_args()
+    options = parser.parse_args()
     run(options)
 
 
