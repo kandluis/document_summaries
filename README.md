@@ -1,15 +1,29 @@
 SampleRuns
 =========
-Add a single document set to the repo.
+To see how the program runs, you can execute it with the included DUC 2004 Data. First, make sure the required packages listed under set-up are installed.
 
-python -m summarize --
+For a quick sample run, you can run this command from the root directory:
 
-SetUp
+```
+python -m summarizer --data_dir=sample_rouge_data --algorithm=grasshopper --rouge_score=True --summarize=True
+```
+
+Feel free to change the --algorithm flag to one of the other available and implemented algorithms. Furthermore, if you do not have ROUGE install, the --rouge_score flag must be set to false.
+
+
+Set-up
 =====
 Required packages for correct parsing of results include:
-  - numpy
-  - nltk
-  - pyrouge
+  - numpy (required)
+  - nltk (required)
+  - pyrouge (optional)
+
+Note that nltk data must be downloaded using
+```
+nltk.download()
+```
+
+Note that you must also set-up pyrouge to work with your install of ROUGE.
 
 If running ROUGE metrics, a valid install of ROUGE is required. For somewhat ambiguous instructions on how to do this (we highly recommend you don't attempt to install ROUGE...), you can attempt to follow the [PyRouge instructions](https://pypi.python.org/pypi/pyrouge/0.1.2) or [StackOverflow](http://stackoverflow.com/questions/28941839/how-to-install-rouge-in-ubuntu) (for Ubuntu systems).
 
