@@ -222,7 +222,6 @@ def cleanOriginalDocs(dir):
             with open(newFile, 'r') as txt:
                 HTML = BSHTML(txt.read(), 'xml')
                 text = HTML.TEXT.text.replace('\n', '')
-                print text
                 sentences = tokenizer.tokenize(text)
                 with open(os.path.join(newDir, 'Parsed.' + fileID), 'w') as f:
                     for s in sentences:

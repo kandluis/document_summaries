@@ -22,6 +22,8 @@ from . import grasshopper
 from . import baselines
 from . import textrank
 
+tokenizer = nltk.data.load('tokenizers/punkt/english.pickle')
+
 # Dictionary mapping algorithm commandline parameters to
 # their respective algorithm classes.
 argsToAlgo = {
@@ -50,6 +52,8 @@ def createSummaries(sum_algo, abs_path, out_path, k=5, bytes=665, multiDocument=
             docIDs.append(tmp[1])
             filepath = os.path.join(abs_path, filename)
             with open(filepath) as inputDoc:
+                text = inputDoc.read().strip()
+                sentences = tokenizer.tokenize(text)
                 D.append(inputDoc.readlines())
 
     # Pass this to the algorithm which should return the summary as
@@ -109,6 +113,7 @@ def run(opts):
     '''
     base = None if opts.data_dir is None else os.path.abspath(opts.data_dir)
     debug = opts.debug.lower() == 'true'
+
     if opts.summarize.lower() == 'true':
         try:
             algorithm = argsToAlgo[opts.algorithm.lower()]
@@ -117,12 +122,14 @@ def run(opts):
                 "{} is not an available algorithm!".format(opts.algorithm))
     else:
         algorithm = opts.algorithm
-    outpath = os.path.join(base, opts.algorithm)
+
+    outpath = None if base is None else os.path.join(base, opts.algorithm)
     if opts.summarize.lower() == 'true':
         k = int(opts.summary_length)
+        bytes = int(opts.bytes)
         if base is None:
-            raise Exception("STDIN currently not supported!")
-
+            print sum_algo([sys.stdin.readlines()], k, bytes)
+            return
         # Create directory if it does not exist
         if not os.path.exists(outpath):
             os.makedirs(outpath)
@@ -134,7 +141,7 @@ def run(opts):
             inpath = os.path.join(inbase, folder)
             try:
                 createSummaries(algorithm, inpath, outpath,
-                                k=k, bytes=opts.bytes, multiDocument=True)
+                                k=k, bytes=bytes, multiDocument=True)
             except Exception as e:
                 print "Failed with {}".format(inpath)
                 if debug:
@@ -142,8 +149,8 @@ def run(opts):
 
     # If rouge score is input, attempt to score the results with pyrouge
     # Currently only handles multiple documents!
-    if opts.data_dir is not None and opts.rouge_score == 'True':
-        r = pyrouge.Rouge155(bytes=opts.bytes)
+    if base is not None and opts.rouge_score == 'True':
+        r = pyrouge.Rouge155(bytes=bytes)
         r.system_dir = outpath
         if debug:
             print "System Directory: {}.".format(r.system_dir)

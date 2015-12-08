@@ -8,8 +8,36 @@ Required packages for correct parsing of results include:
 
 You can see more information how to run the program with the command:
 ```
-python -m summarizer
+python -m summarizer --help
 ```
+
+Program Arguments
+==================
+-d, --data_dir, default=None
+  Base Directory containing summarization documents and model summaries. Summarization documents should be contained in the docs/ subdirectory. All documents need to be pre-processed so that the file name syntax is given by /docs/SETID/Parsed.DOCID.txt. The format is what ROUGE expects. It is possible to avoid this requirement if the system is asked to ignore ROUGE scores (and therefore does not calculate them). A utility is included in the utils.py directory: cleanOriginalDocs(docs). Given a directory directly from the DUC 2004 conference, this utility will convert the output into the input expected by the system.
+
+  If ROUGE is not to be used, then the system will accept a directory which follows the same overall hierarchy (ie, document sets should be contained in sub-folders), but does not necessarily match the required file patterns for Rouge. However, all documents must be prefixed with "Parsed.", as this is the input format that the system expects!
+
+  If no directory is provided, input is streamed from STDIN (or provided text file) and results are output to STDOUT. ROUGE analysis is not performed. This is likely to be the main use for the system, as it will allow anyone to summarize arbitrary text. Note that the text is split into sentences using the NLTK Punkt tokenizer.
+
+-a, --algorithm, default="frequency"
+  Algorithm to use for summarization. Output summaries are saved under the DATA_DIR/ALGORITHM/ directory if a data_dir parameter is provided. Otherwise, results are simply output to STDOUT and must be saved by the user. For an updated list of the available algorithms, pass --help flag.
+
+-s, --rouge_score, default=False
+  The parameter is ignored in the case where DATA_DIR is not set. Otherwise, if ROUGE_SCORE, then the model and system summaries are scored using the ROUGE metrics and results are printed to STDOUT.
+
+
+--debug, default=False
+  Prints helpful debugging information. If the program crashes, setting this flag to true is useful.
+
+--summarize, default=True
+  If true, performs the summarization using the specified ALGORITHM. Otherwise, does not summarize and instead the ALGORITHM parameter simply becomes the output directory where the summarized results should be contained! Setting this to False is helpful if you have already summarized a set of documents previously (or with another system), and wish to simply calculate the ROUGE score for comparison. It is common to have --summarize=False and --rouge_score=True
+
+-k, --summary_length, default=5
+  Sentence length of output summary. Note that a summary might be truncated to be shorter than this length. Currently, summaries are truncated anytime they are output to a file. We work under the assumption that these summaries will then be passed into ROUGE for evaluations.
+
+-b, --bytes, default=665
+  Byte length of output summary. All output summaries will be truncated at this length if written out to a file. A value of -1 will avoid almost all truncation (except the last character).
 
 Multi-Document Text Summarization
 =======
