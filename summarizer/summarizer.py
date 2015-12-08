@@ -9,7 +9,6 @@ Kevin Eskici (keskici@college.harvar.edu)
 '''
 import os
 import traceback
-import pyrouge
 import nltk
 import argparse
 import sys
@@ -146,6 +145,7 @@ def run(opts):
     # If rouge score is input, attempt to score the results with pyrouge
     # Currently only handles multiple documents!
     if base is not None and opts.rouge_score == 'True':
+        import pyrouge
         r = pyrouge.Rouge155(bytes=bytes)
         r.system_dir = outpath
         if debug:
