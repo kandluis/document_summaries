@@ -16,6 +16,7 @@ import traceback
 import pyrouge
 import fileinput
 import pdb
+import nltk
 
 import argparse
 from . import grasshopper
@@ -54,7 +55,7 @@ def createSummaries(sum_algo, abs_path, out_path, k=5, bytes=665, multiDocument=
             with open(filepath) as inputDoc:
                 text = inputDoc.read().strip()
                 sentences = tokenizer.tokenize(text)
-                D.append(inputDoc.readlines())
+                D.append(sentences)
 
     # Pass this to the algorithm which should return the summary as
     # a list of sentences.
@@ -88,14 +89,14 @@ def parseArgs(parser):
                         " summaries are saved under the DATA_DIR/ALGORITHM/" +
                         " directory if a data_dir parameter is provided." +
                         "Current options are {}".format(argsToAlgo.keys()))
-    parser.add_argument("-s", "--rouge_score", default=False,
+    parser.add_argument("-s", "--rouge_score", default="False",
                         help="The parameter is ignored in the case where DATA_DIR " +
                         "is not set. Otherwise, if ROUGE_SCORE, then the model " +
                         "and system summaries are scored using the ROUGE metrics " +
                         "and results are printed to STDOUT.")
-    parser.add_argument("--debug", default=False,
+    parser.add_argument("--debug", default="False",
                         help="Prints helpful debugging information.")
-    parser.add_argument("--summarize", default=True,
+    parser.add_argument("--summarize", default="True",
                         help="If true, performs the summarization using the " +
                         "specified ALGORITHM. Otherwise, does not summarize.")
     parser.add_argument("-k", "--summary_length", default=5,
