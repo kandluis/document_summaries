@@ -1,3 +1,9 @@
+SampleRuns
+=========
+Add a single document set to the repo.
+
+python -m summarize --
+
 SetUp
 =====
 Required packages for correct parsing of results include:
@@ -5,11 +11,18 @@ Required packages for correct parsing of results include:
   - nltk
   - pyrouge
 
+If running ROUGE metrics, a valid install of ROUGE is required. For somewhat ambiguous instructions on how to do this (we highly recommend you don't attempt to install ROUGE...), you can attempt to follow the [PyRouge instructions](https://pypi.python.org/pypi/pyrouge/0.1.2) or [StackOverflow](http://stackoverflow.com/questions/28941839/how-to-install-rouge-in-ubuntu) (for Ubuntu systems).
 
 You can see more information how to run the program with the command:
 ```
 python -m summarizer --help
 ```
+
+Program Data
+============
+The data used for testing the system can be found [here](https://www.dropbox.com/sh/dzmzh5nwe1i68ra/AABYPkOj6lXZln5I6tEDjpAna?dl=0).
+
+For more data requests, please email Luis Perez (luis.perez.live@gmail.com).
 
 Program Arguments
 ==================
