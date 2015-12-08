@@ -62,6 +62,8 @@ target/
 *.blg
 *.fdb_latexmk
 *.out
+
+!trace.out
 *.pdf
 *.synctex.gz
 *.fls
