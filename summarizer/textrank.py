@@ -39,7 +39,7 @@ def concatDocs(D):
     return sents
 
 
-def textRank(D, k):
+def textRank(D, k, bytes=665):
     D = concatDocs(D)
     stop = stopwords.words('english') + [i for i in string.punctuation]
     sentences, mapping = utils.cleanDocument(D)

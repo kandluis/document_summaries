@@ -25,14 +25,16 @@ from . import textrank
 # Dictionary mapping algorithm commandline parameters to
 # their respective algorithm classes.
 argsToAlgo = {
-    'grasshopper':   grasshopper.run_grassHopper,
+    'baseline': baselines.baseline,
     'geomprior':   baselines.geomPriorBaseline,
     'firstgeomprior':   baselines.modifiedGeomPriorBaseline,
     'frequency':   baselines.wordFreqBaseline,
-    'textrank': textrank.textRank}
+    'textrank': textrank.textRank,
+    'grasshopper':   grasshopper.run_grassHopper
+}
 
 
-def createSummaries(sum_algo, abs_path, out_path, k=5, multiDocument=False):
+def createSummaries(sum_algo, abs_path, out_path, k=5, bytes=665, multiDocument=False):
     # Extracted from the input folder name
     setID = abs_path.split('/')[-1]
 
@@ -44,7 +46,7 @@ def createSummaries(sum_algo, abs_path, out_path, k=5, multiDocument=False):
     for filename in os.listdir(abs_path):
         # Only take files that we've parsed before!
         tmp = filename.split('.')
-        if tmp[0] == 'parsed':
+        if tmp[0] == 'Parsed':
             docIDs.append(tmp[1])
             filepath = os.path.join(abs_path, filename)
             with open(filepath) as inputDoc:
@@ -53,20 +55,20 @@ def createSummaries(sum_algo, abs_path, out_path, k=5, multiDocument=False):
     # Pass this to the algorithm which should return the summary as
     # a list of sentences.
     if multiDocument:
-        summary = sum_algo(D, k)
+        summary = sum_algo(D, k, bytes)
         # Write out the summary
         filepath = os.path.join(out_path, "SetSummary.{}.txt".format(setID))
         with open(filepath, 'w+') as out:
-            for s in summary:
-                out.write("{}\n".format(s.strip()))
+            res = "\n".join([s.strip() for s in summary])
+            out.write(res[:bytes])
     else:
         for i in range(len(D)):
             summary = sum_algo([D[i]], k)
             filepath = os.path.join(
                 out_path, "Summary.{}.txt".format(docIDs[i]))
             with open(filepath, 'w+') as out:
-                for s in summary:
-                    out.write("{}\n".format(s.strip()))
+                res = "\n".join([s.strip() for s in summary])
+                out.write(res[:bytes])
 
 
 def parseArgs(parser):
@@ -93,7 +95,12 @@ def parseArgs(parser):
                         help="If true, performs the summarization using the " +
                         "specified ALGORITHM. Otherwise, does not summarize.")
     parser.add_argument("-k", "--summary_length", default=5,
-                        help="Sentence length of output summary")
+                        help="Sentence length of output summary. Note that a summary" +
+                        " might be truncated to be shorter than this length.")
+    parser.add_argument("-b", "--bytes", default=665,
+                        help="Byte length of output summary. All output summaries" +
+                        " will be truncated at this length if written out to a file." +
+                        "A value of -1 will avoid almost all truncation (except the last character).")
 
 
 def run(opts):
@@ -102,7 +109,7 @@ def run(opts):
     '''
     base = None if opts.data_dir is None else os.path.abspath(opts.data_dir)
     debug = opts.debug.lower() == 'true'
-    if opts.summarize.lower == 'true':
+    if opts.summarize.lower() == 'true':
         try:
             algorithm = argsToAlgo[opts.algorithm.lower()]
         except KeyError:
@@ -112,7 +119,7 @@ def run(opts):
         algorithm = opts.algorithm
     outpath = os.path.join(base, opts.algorithm)
     if opts.summarize.lower() == 'true':
-        k = opts.summary_length
+        k = int(opts.summary_length)
         if base is None:
             raise Exception("STDIN currently not supported!")
 
@@ -127,7 +134,7 @@ def run(opts):
             inpath = os.path.join(inbase, folder)
             try:
                 createSummaries(algorithm, inpath, outpath,
-                                k=k, multiDocument=True)
+                                k=k, bytes=opts.bytes, multiDocument=True)
             except Exception as e:
                 print "Failed with {}".format(inpath)
                 if debug:
@@ -136,11 +143,11 @@ def run(opts):
     # If rouge score is input, attempt to score the results with pyrouge
     # Currently only handles multiple documents!
     if opts.data_dir is not None and opts.rouge_score == 'True':
-        r = pyrouge.Rouge155(bytes=665)
+        r = pyrouge.Rouge155(bytes=opts.bytes)
         r.system_dir = outpath
         if debug:
             print "System Directory: {}.".format(r.system_dir)
-        r.model_dir = os.path.join(base, 'model_multi_1')
+        r.model_dir = os.path.join(base, 'model_multi')
         if debug:
             print "Model Directory: {}.".format(r.model_dir)
         r.system_filename_pattern = 'SetSummary.(\d+).txt'

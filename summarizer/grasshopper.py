@@ -87,7 +87,7 @@ def docToMatrix(D, vec_fun=utils.frequency, sim_fun=utils.cosineSim):
     return M
 
 
-def grasshopper(W, r, lamb, k, epsilon=0.0000001):
+def grasshopper(W, r, lamb, k, epsilon=0.0001):
     '''
     Implements the Grasshopper algorithm described in the following paper:
     Improving Diversity in Ranking Using Absorbing Random Walks:
@@ -165,7 +165,7 @@ def grasshopper(W, r, lamb, k, epsilon=0.0000001):
     return zip(absorbed, probs)
 
 
-def run_grassHopper(D, k):
+def run_grassHopper(D, k, bytes=665):
     '''
     Runs the optimized grasshopper algorithm.
 
@@ -183,7 +183,7 @@ def run_grassHopper(D, k):
     lamb = 0.5
     alpha = 0.25
     r = utils.decayDistribution(alpha, len(WClean))
-    results = grasshopper(WClean, r, lamb, 5)
+    results = grasshopper(WClean, r, lamb, k)
 
     # Extract the summary
     summary = []
