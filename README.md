@@ -1,5 +1,15 @@
-=== Set Up ===
+SetUp
+=====
+Required packages for correct parsing of results include:
+  - numpy
+  - nltk
+  - pyrouge
 
+
+You can see more information how to run the program with the command:
+```
+python -m summarizer
+```
 
 Multi-Document Text Summarization
 =======

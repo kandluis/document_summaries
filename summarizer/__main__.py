@@ -15,6 +15,7 @@ import os
 import traceback
 import pyrouge
 import fileinput
+import pdb
 
 import argparse
 from . import grasshopper
@@ -82,7 +83,7 @@ def parseArgs(parser):
                         " directory if a data_dir parameter is provided." +
                         "Current options are {}".format(argsToAlgo.keys()))
     parser.add_argument("-s", "--rouge_score", default=False,
-                        help="The paremeter is ignored in the case where DATA_DIR " +
+                        help="The parameter is ignored in the case where DATA_DIR " +
                         "is not set. Otherwise, if ROUGE_SCORE, then the model " +
                         "and system summaries are scored using the ROUGE metrics " +
                         "and results are printed to STDOUT.")
@@ -100,20 +101,22 @@ def run(opts):
     Runs our summarization software based on user options.
     '''
     base = None if opts.data_dir is None else os.path.abspath(opts.data_dir)
-    debug = opts.debug == 'True'
-    if opts.summarize:
+    debug = opts.debug.lower() == 'true'
+    if opts.summarize.lower == 'true':
         try:
             algorithm = argsToAlgo[opts.algorithm.lower()]
         except KeyError:
             raise Exception(
                 "{} is not an available algorithm!".format(opts.algorithm))
-
+    else:
+        algorithm = opts.algorithm
+    outpath = os.path.join(base, opts.algorithm)
+    if opts.summarize.lower() == 'true':
         k = opts.summary_length
         if base is None:
             raise Exception("STDIN currently not supported!")
 
         # Create directory if it does not exist
-        outpath = os.path.join(base, opts.algorithm)
         if not os.path.exists(outpath):
             os.makedirs(outpath)
 
@@ -127,17 +130,17 @@ def run(opts):
                                 k=k, multiDocument=True)
             except Exception as e:
                 print "Failed with {}".format(inpath)
-                if debug == 'True':
+                if debug:
                     print traceback.print_exc()
 
     # If rouge score is input, attempt to score the results with pyrouge
     # Currently only handles multiple documents!
     if opts.data_dir is not None and opts.rouge_score == 'True':
-        r = pyrouge.Rouge155()
+        r = pyrouge.Rouge155(bytes=665)
         r.system_dir = outpath
         if debug:
             print "System Directory: {}.".format(r.system_dir)
-        r.model_dir = os.path.join(base, 'model_multi')
+        r.model_dir = os.path.join(base, 'model_multi_1')
         if debug:
             print "Model Directory: {}.".format(r.model_dir)
         r.system_filename_pattern = 'SetSummary.(\d+).txt'

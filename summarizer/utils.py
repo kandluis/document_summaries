@@ -17,9 +17,11 @@ import numpy as np
 import re
 import os
 import nltk.stem
+import nltk.data
 
 regex = re.compile('[^a-zA-Z]')
 myStopwords = set(stopwords.words('english'))
+tokenizer = nltk.data.load('tokenizers/punkt/english.pickle')
 
 
 class MyCounter(Counter):
@@ -219,6 +221,8 @@ def cleanOriginalDocs(dir):
             with open(newFile, 'r') as txt:
                 HTML = BSHTML(txt.read(), 'xml')
                 text = HTML.TEXT.text
+                TODO
+                sentences = tokenizer.tokenize(text)
                 sentences = [s.replace('\n', '') for s in text.split('. ')]
                 with open(os.path.join(newDir, 'Parsed.' + name), 'w') as f:
                     for s in sentences:
