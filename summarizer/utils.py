@@ -212,19 +212,19 @@ def cleanOriginalDocs(dir):
         for name in os.listdir(newDir):
             # Rename the documents themselves
             tmp = name.split('.')
-            fielID = tmp[0][3:] + tmp[1] + '.txt'
-            newFile = os.path.join(newDir, ID)
+            # print tmp
+            fileID = tmp[0][3:] + tmp[1] + '.txt'
+            newFile = os.path.join(newDir, fileID)
             oldFile = os.path.join(newDir, name)
             os.rename(oldFile, newFile)
 
             # Extract the text!
             with open(newFile, 'r') as txt:
                 HTML = BSHTML(txt.read(), 'xml')
-                text = HTML.TEXT.text
-                TODO
+                text = HTML.TEXT.text.replace('\n', '')
+                print text
                 sentences = tokenizer.tokenize(text)
-                sentences = [s.replace('\n', '') for s in text.split('. ')]
-                with open(os.path.join(newDir, 'Parsed.' + name), 'w') as f:
+                with open(os.path.join(newDir, 'Parsed.' + fileID), 'w') as f:
                     for s in sentences:
                         f.write("{}\n".format(s))
 

@@ -58,7 +58,7 @@ def createSummaries(sum_algo, abs_path, out_path, k=5, multiDocument=False):
         filepath = os.path.join(out_path, "SetSummary.{}.txt".format(setID))
         with open(filepath, 'w+') as out:
             for s in summary:
-                out.write("{}.\n".format(s.strip()))
+                out.write("{}\n".format(s.strip()))
     else:
         for i in range(len(D)):
             summary = sum_algo([D[i]], k)
@@ -66,7 +66,7 @@ def createSummaries(sum_algo, abs_path, out_path, k=5, multiDocument=False):
                 out_path, "Summary.{}.txt".format(docIDs[i]))
             with open(filepath, 'w+') as out:
                 for s in summary:
-                    out.write("{}.\n".format(s.strip()))
+                    out.write("{}\n".format(s.strip()))
 
 
 def parseArgs(parser):
