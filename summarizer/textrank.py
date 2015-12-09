@@ -39,7 +39,7 @@ def concatDocs(D):
     return sents
 
 
-def textRank(D, k, bytes=665):
+def textRank(D, k):
     D = concatDocs(D)
     stop = stopwords.words('english') + [i for i in string.punctuation]
     sentences, mapping = utils.cleanDocument(D)
@@ -71,5 +71,38 @@ def textRank(D, k, bytes=665):
 
 
 def modifiedTextRank(D, k):
+    D = concatDocs(D)
+    stop = stopwords.words('english') + [i for i in string.punctuation]
+    sentences, mapping = utils.cleanDocument(D)
+    G = np.diag([1.0] * len(sentences))
+    tagged_sentences = [nltk.pos_tag(sentences[i])
+                        for i in xrange(len(sentences))]
+    scores = [1.0] * len(sentences)
+    summary = []
+    summary_words = set()
 
-    return
+    while len(summary) < min(k, len(sentences)):
+        filtered_sentences = [[word[0].lower() for word in sentence
+                               if word[0] not in stop and word[1] in
+                               ['NN', 'JJ', 'VB', 'NP', 'NNS', 'RB', 'VBN', 'VBG'] 
+                               and word[0] not in summary_words
+                               and len(word[0]) > 2] for sentence in tagged_sentences]
+        # populate graph
+        for i, j in combinations(range(len(filtered_sentences)), 2):
+            G[i][j] = sent_sim(filtered_sentences[i], filtered_sentences[j])
+
+        converged = False
+        while not converged:
+            converged = True
+            for node in xrange(len(sentences)):
+                old_score = scores[node]
+                scores[node] = score_sentence(G, node, 0.85, scores)
+                if abs(scores[node] - old_score) > 0.0001:
+                    converged = False
+        new_sent = sorted([(scores[i], i) for i in xrange(len(scores))], reverse=True)[0][1]
+        summary.append(new_sent)
+        summary_words = summary_words.union(sentences[new_sent])
+
+    summary_sents = [index for (score, index) in sorted([(scores[i], i)
+                                                                for i in xrange(len(scores))], reverse=True)[:k]]
+    return [D[mapping[i]] for i in summary_sents]

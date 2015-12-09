@@ -27,6 +27,7 @@ argsToAlgo = {
     'firstgeomprior':   baselines.modifiedGeomPriorBaseline,
     'frequency':   baselines.wordFreqBaseline,
     'textrank': textrank.textRank,
+    'modifiedtextrank': textrank.modifiedTextRank,
     'grasshopper':   grasshopper.run_grassHopper,
     'modifiedgrasshopper': grasshopper.run_modified_grasshopper
 }
