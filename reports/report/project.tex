@@ -1,5 +1,6 @@
 \documentclass[11pt]{article}
 \usepackage{common}
+
 \title{MultiDocument Text Summarization}
 \author{Kevin Eskici (keskici@college.harvard.edu) \and Luis A. Perez (luis.perez.live@gmail.com)\\
 Computer Science 182, Harvard University}
@@ -8,6 +9,7 @@ Computer Science 182, Harvard University}
 
 
 \section{Introduction}
+
 
 A description of the purpose, goals, and scope of your system or
 empirical investigation.  You should include references to papers you
@@ -83,23 +85,642 @@ evaluation. Discuss what you learned from the implementation.
 \appendix
 
 \section{Program Trace}
+\label{sec:program_trace}
 
-Appendix 1 – A trace of the program showing how it handles key examples or some other demonstration of the program in action.
+We now present a trace of the program as it summarizes a single document set utilizing the {\sc GrassHopper} algorithm with our own modification. We present an abbreviated version of the traceback. Note that we have included a tool, \verb|tracer.py| which allows for the generation of traces. Note that without ignoring some modules (such as utils.py), traces can run into the hundreds of megabytes and take a few minutes to generate.
+
+The command, using the above tool which can be found in the root directory of our repository, used to generate the below trace, is now presented. Note that the command is executed from the root directory. 
+\begin{verbatim}
+python tracer.py --data_dir=sample_rouge_data --algorithm=grasshopper \
+	--rouge_score=True --summarize=True --debug=True > trace.out
+\end{verbatim}
+
+If more detail on the trace is required, modifications on \verb|tracer.py| can be made to ignore fewer modules. Note that the trace presented below can be viewed in its entirety \href{https://raw.githubusercontent.com/kandluis/document_summaries/master/trace.out}{here}.
+
+\begin{lstlisting}[language=Python]
+ --- modulename: tracer, funcname: <module>
+<string>(1):   --- modulename: summarizer, funcname: run
+summarizer.py(110):     base = None if opts.data_dir is None else os.path.abspath(opts.data_dir)
+summarizer.py(111):     debug = opts.debug.lower() == 'true'
+summarizer.py(113):     if opts.summarize.lower() == 'true':
+summarizer.py(114):         try:
+summarizer.py(115):             algorithm = argsToAlgo[opts.algorithm.lower()]
+summarizer.py(122):     outpath = None if base is None else os.path.join(base, opts.algorithm)
+summarizer.py(123):     if opts.summarize.lower() == 'true':
+summarizer.py(124):         k = int(opts.summary_length)
+summarizer.py(125):         bytes = int(opts.bytes)
+summarizer.py(126):         if base is None:
+summarizer.py(130):         if not os.path.exists(outpath):
+summarizer.py(133):         inbase = os.path.join(base, 'docs')
+summarizer.py(134):         folders = dirs = [d for d in os.listdir(
+summarizer.py(135):             inbase) if os.path.isdir(os.path.join(inbase, d))]
+ --- modulename: stat, funcname: S_ISDIR
+stat.py(41):     return S_IFMT(mode) == S_IFDIR
+ --- modulename: stat, funcname: S_IFMT
+stat.py(25):     return mode & 0170000
+summarizer.py(135):             inbase) if os.path.isdir(os.path.join(inbase, d))]
+summarizer.py(136):         for folder in folders:
+summarizer.py(137):             inpath = os.path.join(inbase, folder)
+summarizer.py(138):             try:
+summarizer.py(139):                 createSummaries(algorithm, inpath, outpath,
+summarizer.py(140):                                 k=k, bytes=bytes, multiDocument=True)
+ --- modulename: summarizer, funcname: createSummaries
+summarizer.py(69):     setID = abs_path.split('/')[-1]
+summarizer.py(72):     docIDs = []
+summarizer.py(75):     D = []
+summarizer.py(76):     for filename in os.listdir(abs_path):
+summarizer.py(78):         tmp = filename.split('.')
+summarizer.py(79):         if tmp[0] == 'Parsed':
+summarizer.py(80):             docIDs.append(tmp[1])
+summarizer.py(81):             filepath = os.path.join(abs_path, filename)
+summarizer.py(82):             with open(filepath) as inputDoc:
+summarizer.py(83):                 text = inputDoc.read().strip()
+summarizer.py(84):                 sentences = tokenizer.tokenize(text)
+summarizer.py(85):                 D.append(sentences)
+summarizer.py(76):     for filename in os.listdir(abs_path):
+summarizer.py(78):         tmp = filename.split('.')
+summarizer.py(79):         if tmp[0] == 'Parsed':
+summarizer.py(80):             docIDs.append(tmp[1])
+summarizer.py(81):             filepath = os.path.join(abs_path, filename)
+summarizer.py(82):             with open(filepath) as inputDoc:
+summarizer.py(83):                 text = inputDoc.read().strip()
+summarizer.py(84):                 sentences = tokenizer.tokenize(text)
+summarizer.py(85):                 D.append(sentences)
+summarizer.py(76):     for filename in os.listdir(abs_path):
+summarizer.py(78):         tmp = filename.split('.')
+summarizer.py(79):         if tmp[0] == 'Parsed':
+summarizer.py(80):             docIDs.append(tmp[1])
+summarizer.py(81):             filepath = os.path.join(abs_path, filename)
+summarizer.py(82):             with open(filepath) as inputDoc:
+summarizer.py(83):                 text = inputDoc.read().strip()
+summarizer.py(84):                 sentences = tokenizer.tokenize(text)
+summarizer.py(85):                 D.append(sentences)
+summarizer.py(76):     for filename in os.listdir(abs_path):
+summarizer.py(78):         tmp = filename.split('.')
+summarizer.py(79):         if tmp[0] == 'Parsed':
+summarizer.py(80):             docIDs.append(tmp[1])
+summarizer.py(81):             filepath = os.path.join(abs_path, filename)
+summarizer.py(82):             with open(filepath) as inputDoc:
+summarizer.py(83):                 text = inputDoc.read().strip()
+summarizer.py(84):                 sentences = tokenizer.tokenize(text)
+summarizer.py(85):                 D.append(sentences)
+summarizer.py(76):     for filename in os.listdir(abs_path):
+summarizer.py(78):         tmp = filename.split('.')
+summarizer.py(79):         if tmp[0] == 'Parsed':
+summarizer.py(80):             docIDs.append(tmp[1])
+summarizer.py(81):             filepath = os.path.join(abs_path, filename)
+summarizer.py(82):             with open(filepath) as inputDoc:
+summarizer.py(83):                 text = inputDoc.read().strip()
+summarizer.py(84):                 sentences = tokenizer.tokenize(text)
+summarizer.py(85):                 D.append(sentences)
+summarizer.py(76):     for filename in os.listdir(abs_path):
+summarizer.py(78):         tmp = filename.split('.')
+summarizer.py(79):         if tmp[0] == 'Parsed':
+summarizer.py(80):             docIDs.append(tmp[1])
+summarizer.py(81):             filepath = os.path.join(abs_path, filename)
+summarizer.py(82):             with open(filepath) as inputDoc:
+summarizer.py(83):                 text = inputDoc.read().strip()
+summarizer.py(84):                 sentences = tokenizer.tokenize(text)
+summarizer.py(85):                 D.append(sentences)
+summarizer.py(76):     for filename in os.listdir(abs_path):
+summarizer.py(78):         tmp = filename.split('.')
+summarizer.py(79):         if tmp[0] == 'Parsed':
+summarizer.py(80):             docIDs.append(tmp[1])
+summarizer.py(81):             filepath = os.path.join(abs_path, filename)
+summarizer.py(82):             with open(filepath) as inputDoc:
+summarizer.py(83):                 text = inputDoc.read().strip()
+summarizer.py(84):                 sentences = tokenizer.tokenize(text)
+summarizer.py(85):                 D.append(sentences)
+summarizer.py(76):     for filename in os.listdir(abs_path):
+summarizer.py(78):         tmp = filename.split('.')
+summarizer.py(79):         if tmp[0] == 'Parsed':
+summarizer.py(80):             docIDs.append(tmp[1])
+summarizer.py(81):             filepath = os.path.join(abs_path, filename)
+summarizer.py(82):             with open(filepath) as inputDoc:
+summarizer.py(83):                 text = inputDoc.read().strip()
+summarizer.py(84):                 sentences = tokenizer.tokenize(text)
+summarizer.py(85):                 D.append(sentences)
+summarizer.py(76):     for filename in os.listdir(abs_path):
+summarizer.py(78):         tmp = filename.split('.')
+summarizer.py(79):         if tmp[0] == 'Parsed':
+summarizer.py(80):             docIDs.append(tmp[1])
+summarizer.py(81):             filepath = os.path.join(abs_path, filename)
+summarizer.py(82):             with open(filepath) as inputDoc:
+summarizer.py(83):                 text = inputDoc.read().strip()
+summarizer.py(84):                 sentences = tokenizer.tokenize(text)
+summarizer.py(85):                 D.append(sentences)
+summarizer.py(76):     for filename in os.listdir(abs_path):
+summarizer.py(78):         tmp = filename.split('.')
+summarizer.py(79):         if tmp[0] == 'Parsed':
+summarizer.py(80):             docIDs.append(tmp[1])
+summarizer.py(81):             filepath = os.path.join(abs_path, filename)
+summarizer.py(82):             with open(filepath) as inputDoc:
+summarizer.py(83):                 text = inputDoc.read().strip()
+summarizer.py(84):                 sentences = tokenizer.tokenize(text)
+summarizer.py(85):                 D.append(sentences)
+summarizer.py(76):     for filename in os.listdir(abs_path):
+summarizer.py(89):     if multiDocument:
+summarizer.py(90):         summary = sum_algo(D, k, bytes)
+ --- modulename: grasshopper, funcname: run_grassHopper
+grasshopper.py(174):     D = [s for d in D for s in d]
+grasshopper.py(174):     D = [s for d in D for s in d]
+grasshopper.py(174):     D = [s for d in D for s in d]
+grasshopper.py(174):     D = [s for d in D for s in d]
+grasshopper.py(174):     D = [s for d in D for s in d]
+grasshopper.py(174):     D = [s for d in D for s in d]
+grasshopper.py(174):     D = [s for d in D for s in d]
+...
+grasshopper.py(174):     D = [s for d in D for s in d]
+grasshopper.py(174):     D = [s for d in D for s in d]
+grasshopper.py(174):     D = [s for d in D for s in d]
+grasshopper.py(174):     D = [s for d in D for s in d]
+grasshopper.py(177):     cleanDoc, mapping = utils.cleanDocument(D)
+grasshopper.py(178):     WClean = docToMatrix(
+grasshopper.py(179):         cleanDoc, sim_fun=utils.threshHoldCosineSim)
+ --- modulename: grasshopper, funcname: docToMatrix
+grasshopper.py(79):     sentenceVectors = vec_fun(D)
+grasshopper.py(82):     n = len(D)
+grasshopper.py(83):     M = np.zeros((n, n))
+grasshopper.py(84):     for i in range(n):
+grasshopper.py(85):         for j in range(n):
+grasshopper.py(86):             M[i, j] = sim_fun(sentenceVectors[i], sentenceVectors[j])
+ --- modulename: _abcoll, funcname: __subclasshook__
+_abcoll.py(100):         if cls is Sized:
+_abcoll.py(103):         return NotImplemented
+ --- modulename: _abcoll, funcname: __subclasshook__
+_abcoll.py(100):         if cls is Sized:
+_abcoll.py(103):         return NotImplemented
+grasshopper.py(85):         for j in range(n):
+grasshopper.py(86):             M[i, j] = sim_fun(sentenceVectors[i], sentenceVectors[j])
+grasshopper.py(85):         for j in range(n):
+grasshopper.py(86):             M[i, j] = sim_fun(sentenceVectors[i], sentenceVectors[j])
+grasshopper.py(85):         for j in range(n):
+grasshopper.py(86):             M[i, j] = sim_fun(sentenceVectors[i], sentenceVectors[j])
+grasshopper.py(85):         for j in range(n):
+grasshopper.py(86):             M[i, j] = sim_fun(sentenceVectors[i], sentenceVectors[j])
+grasshopper.py(85):         for j in range(n):
+grasshopper.py(86):             M[i, j] = sim_fun(sentenceVectors[i], sentenceVectors[j])
+grasshopper.py(85):         for j in range(n):
+grasshopper.py(86):             M[i, j] = sim_fun(sentenceVectors[i], sentenceVectors[j])
+grasshopper.py(85):         for j in range(n):
+grasshopper.py(86):             M[i, j] = sim_fun(sentenceVectors[i], sentenceVectors[j])
+...
+sim_fun(sentenceVectors[i], sentenceVectors[j])
+grasshopper.py(85):         for j in range(n):
+grasshopper.py(86):             M[i, j] = sim_fun(sentenceVectors[i], sentenceVectors[j])
+grasshopper.py(85):         for j in range(n):
+grasshopper.py(84):     for i in range(n):
+grasshopper.py(87):     return M
+grasshopper.py(183):     lamb = 0.5
+grasshopper.py(184):     alpha = 0.25
+grasshopper.py(185):     r = utils.decayDistribution(alpha, len(WClean))
+grasshopper.py(186):     results = grasshopper(WClean, r, lamb, k)
+ --- modulename: grasshopper, funcname: grasshopper
+grasshopper.py(117):     n, m = W.shape
+grasshopper.py(118):     assert n == m  # Sizes should be equal
+grasshopper.py(119):     assert np.min(W) >= 0  # No negative edges
+grasshopper.py(120):     assert abs(np.sum(r) - 1) < epsilon  # r is a distribution
+grasshopper.py(121):     assert 0 <= lamb and lamb <= 1  # lambda is valid
+grasshopper.py(122):     assert 0 < k and k <= n  # Summary can't be longer than document!
+grasshopper.py(125):     P = W / np.sum(W, axis=1)
+grasshopper.py(126):     hatP = lamb * P + (1 - lamb) * r
+grasshopper.py(128):     assert hatP.shape == (n, m)  # Shape should not change!
+grasshopper.py(131):     absorbed = []
+grasshopper.py(132):     nonAbsorbed = range(n)
+grasshopper.py(133):     probs = []
+grasshopper.py(136):     q = stationary(hatP)
+ --- modulename: grasshopper, funcname: stationary
+grasshopper.py(23):     values, vectors = np.linalg.eig(Mat.T)
+ --- modulename: numeric, funcname: asarray
+numeric.py(474):     return array(a, dtype, copy=False, order=order)
+ --- modulename: numeric, funcname: asanyarray
+numeric.py(525):     return array(a, dtype, copy=False, order=order, subok=True)
+grasshopper.py(24):     index = np.nonzero((abs(np.real(values) - 1.0) < epsilon) &
+ --- modulename: type_check, funcname: real
+type_check.py(139):     return asanyarray(val).real
+ --- modulename: numeric, funcname: asanyarray
+numeric.py(525):     return array(a, dtype, copy=False, order=order, subok=True)
+grasshopper.py(25):                        (abs(np.imag(values)) < epsilon))[0][0]
+ --- modulename: type_check, funcname: imag
+type_check.py(170):     return asanyarray(val).imag
+ --- modulename: numeric, funcname: asanyarray
+numeric.py(525):     return array(a, dtype, copy=False, order=order, subok=True)
+grasshopper.py(27):     q = vectors[:, index]
+grasshopper.py(28):     assert(abs((q**2).sum() - 1) < epsilon)
+grasshopper.py(30):     return q / np.sum(q)  # convert into probability distribution
+grasshopper.py(137):     absorbed.append(np.argmax(q))
+grasshopper.py(138):     probs.append(np.max(q))
+grasshopper.py(139):     nonAbsorbed.remove(np.argmax(q))
+grasshopper.py(143):     while (len(absorbed) < k):
+grasshopper.py(148):         N = np.linalg.inv(
+grasshopper.py(149):             np.identity(len(nonAbsorbed)) - hatP[nonAbsorbed, nonAbsorbed])
+ --- modulename: numeric, funcname: identity
+numeric.py(2209):     from numpy import eye
+numeric.py(2210):     return eye(n, dtype=dtype)
+ --- modulename: numeric, funcname: asarray
+numeric.py(474):     return array(a, dtype, copy=False, order=order)
+grasshopper.py(151):         nuvisit = np.sum(N, axis=1)
+grasshopper.py(152):         nvisit = np.zeros(n)
+grasshopper.py(153):         nvisit[nonAbsorbed] = nuvisit
+grasshopper.py(156):         absorbState = np.argmax(nvisit)
+grasshopper.py(157):         absorbVisit = max(nvisit)
+grasshopper.py(159):         absorbed.append(absorbState)
+grasshopper.py(160):         probs.append(absorbVisit)
+grasshopper.py(162):         nonAbsorbed.remove(absorbState)
+grasshopper.py(143):     while (len(absorbed) < k):
+grasshopper.py(148):         N = np.linalg.inv(
+grasshopper.py(149):             np.identity(len(nonAbsorbed)) - hatP[nonAbsorbed, nonAbsorbed])
+ --- modulename: numeric, funcname: identity
+numeric.py(2209):     from numpy import eye
+numeric.py(2210):     return eye(n, dtype=dtype)
+ --- modulename: numeric, funcname: asarray
+numeric.py(474):     return array(a, dtype, copy=False, order=order)
+grasshopper.py(151):         nuvisit = np.sum(N, axis=1)
+grasshopper.py(152):         nvisit = np.zeros(n)
+grasshopper.py(153):         nvisit[nonAbsorbed] = nuvisit
+grasshopper.py(156):         absorbState = np.argmax(nvisit)
+grasshopper.py(157):         absorbVisit = max(nvisit)
+grasshopper.py(159):         absorbed.append(absorbState)
+grasshopper.py(160):         probs.append(absorbVisit)
+grasshopper.py(162):         nonAbsorbed.remove(absorbState)
+grasshopper.py(143):     while (len(absorbed) < k):
+grasshopper.py(148):         N = np.linalg.inv(
+grasshopper.py(149):             np.identity(len(nonAbsorbed)) - hatP[nonAbsorbed, nonAbsorbed])
+ --- modulename: numeric, funcname: identity
+numeric.py(2209):     from numpy import eye
+numeric.py(2210):     return eye(n, dtype=dtype)
+ --- modulename: numeric, funcname: asarray
+numeric.py(474):     return array(a, dtype, copy=False, order=order)
+grasshopper.py(151):         nuvisit = np.sum(N, axis=1)
+grasshopper.py(152):         nvisit = np.zeros(n)
+grasshopper.py(153):         nvisit[nonAbsorbed] = nuvisit
+grasshopper.py(156):         absorbState = np.argmax(nvisit)
+grasshopper.py(157):         absorbVisit = max(nvisit)
+grasshopper.py(159):         absorbed.append(absorbState)
+grasshopper.py(160):         probs.append(absorbVisit)
+grasshopper.py(162):         nonAbsorbed.remove(absorbState)
+grasshopper.py(143):     while (len(absorbed) < k):
+grasshopper.py(148):         N = np.linalg.inv(
+grasshopper.py(149):             np.identity(len(nonAbsorbed)) - hatP[nonAbsorbed, nonAbsorbed])
+ --- modulename: numeric, funcname: identity
+numeric.py(2209):     from numpy import eye
+numeric.py(2210):     return eye(n, dtype=dtype)
+ --- modulename: numeric, funcname: asarray
+numeric.py(474):     return array(a, dtype, copy=False, order=order)
+grasshopper.py(151):         nuvisit = np.sum(N, axis=1)
+grasshopper.py(152):         nvisit = np.zeros(n)
+grasshopper.py(153):         nvisit[nonAbsorbed] = nuvisit
+grasshopper.py(156):         absorbState = np.argmax(nvisit)
+grasshopper.py(157):         absorbVisit = max(nvisit)
+grasshopper.py(159):         absorbed.append(absorbState)
+grasshopper.py(160):         probs.append(absorbVisit)
+grasshopper.py(162):         nonAbsorbed.remove(absorbState)
+grasshopper.py(143):     while (len(absorbed) < k):
+grasshopper.py(165):     return zip(absorbed, probs)
+grasshopper.py(189):     summary = []
+grasshopper.py(190):     for (i, p) in sorted(results, key=lambda x: x[0]):
+ --- modulename: grasshopper, funcname: <lambda>
+grasshopper.py(190):     for (i, p) in sorted(results, key=lambda x: x[0]):
+ --- modulename: grasshopper, funcname: <lambda>
+grasshopper.py(190):     for (i, p) in sorted(results, key=lambda x: x[0]):
+ --- modulename: grasshopper, funcname: <lambda>
+grasshopper.py(190):     for (i, p) in sorted(results, key=lambda x: x[0]):
+ --- modulename: grasshopper, funcname: <lambda>
+grasshopper.py(190):     for (i, p) in sorted(results, key=lambda x: x[0]):
+ --- modulename: grasshopper, funcname: <lambda>
+grasshopper.py(190):     for (i, p) in sorted(results, key=lambda x: x[0]):
+grasshopper.py(191):         summary.append(D[i])
+grasshopper.py(190):     for (i, p) in sorted(results, key=lambda x: x[0]):
+grasshopper.py(191):         summary.append(D[i])
+grasshopper.py(190):     for (i, p) in sorted(results, key=lambda x: x[0]):
+grasshopper.py(191):         summary.append(D[i])
+grasshopper.py(190):     for (i, p) in sorted(results, key=lambda x: x[0]):
+grasshopper.py(191):         summary.append(D[i])
+grasshopper.py(190):     for (i, p) in sorted(results, key=lambda x: x[0]):
+grasshopper.py(191):         summary.append(D[i])
+grasshopper.py(190):     for (i, p) in sorted(results, key=lambda x: x[0]):
+grasshopper.py(193):     return summary
+summarizer.py(92):         filepath = os.path.join(out_path, "SetSummary.{}.txt".format(setID))
+summarizer.py(93):         with open(filepath, 'w+') as out:
+summarizer.py(94):             res = "\n".join([s.strip() for s in summary])
+summarizer.py(94):             res = "\n".join([s.strip() for s in summary])
+summarizer.py(94):             res = "\n".join([s.strip() for s in summary])
+summarizer.py(94):             res = "\n".join([s.strip() for s in summary])
+summarizer.py(94):             res = "\n".join([s.strip() for s in summary])
+summarizer.py(94):             res = "\n".join([s.strip() for s in summary])
+summarizer.py(95):             out.write(res[:bytes])
+summarizer.py(136):         for folder in folders:
+summarizer.py(148):     if base is not None and opts.rouge_score == 'True':
+summarizer.py(149):         r = pyrouge.Rouge155(bytes=bytes)
+ --- modulename: log, funcname: get_global_console_logger
+log.py(17):     return get_console_logger('global')
+ --- modulename: log, funcname: get_console_logger
+log.py(5):     logFormatter = logging.Formatter(
+log.py(6):         "%(asctime)s [%(threadName)-12.12s] [%(levelname)-5.5s]  %(message)s")
+log.py(7):     logger = logging.getLogger(name)
+log.py(8):     if not logger.handlers:
+log.py(9):         logger.setLevel(logging.INFO)
+log.py(10):         ch = logging.StreamHandler()
+log.py(11):         ch.setFormatter(logFormatter)
+log.py(12):         logger.addHandler(ch)
+log.py(13):     return logger
+ --- modulename: _abcoll, funcname: update
+_abcoll.py(551):         if not args:
+_abcoll.py(554):         self = args[0]
+_abcoll.py(555):         args = args[1:]
+_abcoll.py(556):         if len(args) > 1:
+_abcoll.py(559):         if args:
+_abcoll.py(570):         for key, value in kwds.items():
+ --- modulename: _abcoll, funcname: update
+_abcoll.py(551):         if not args:
+_abcoll.py(554):         self = args[0]
+_abcoll.py(555):         args = args[1:]
+_abcoll.py(556):         if len(args) > 1:
+_abcoll.py(559):         if args:
+_abcoll.py(570):         for key, value in kwds.items():
+ --- modulename: _abcoll, funcname: update
+_abcoll.py(551):         if not args:
+_abcoll.py(554):         self = args[0]
+_abcoll.py(555):         args = args[1:]
+_abcoll.py(556):         if len(args) > 1:
+_abcoll.py(559):         if args:
+_abcoll.py(570):         for key, value in kwds.items():
+ --- modulename: file_utils, funcname: verify_dir
+file_utils.py(81):     if name:
+file_utils.py(82):         name_str = "Cannot set {} directory because t".format(name)
+file_utils.py(85):     msg = "{}he path {} does not exist.".format(name_str, path)
+file_utils.py(86):     if not os.path.exists(path):
+summarizer.py(150):         r.system_dir = outpath
+ --- modulename: file_utils, funcname: verify_dir
+file_utils.py(81):     if name:
+file_utils.py(82):         name_str = "Cannot set {} directory because t".format(name)
+file_utils.py(85):     msg = "{}he path {} does not exist.".format(name_str, path)
+file_utils.py(86):     if not os.path.exists(path):
+summarizer.py(151):         if debug:
+summarizer.py(152):             print "System Directory: {}.".format(r.system_dir)
+System Directory: /home/luis/Dropbox/OnlineDocuments/HarvardSchoolWork/Fall2015/cs182/project/sample_rouge_data/grasshopper.
+summarizer.py(153):         r.model_dir = os.path.join(base, 'model_multi')
+ --- modulename: file_utils, funcname: verify_dir
+file_utils.py(81):     if name:
+file_utils.py(82):         name_str = "Cannot set {} directory because t".format(name)
+file_utils.py(85):     msg = "{}he path {} does not exist.".format(name_str, path)
+file_utils.py(86):     if not os.path.exists(path):
+summarizer.py(154):         if debug:
+summarizer.py(155):             print "Model Directory: {}.".format(r.model_dir)
+Model Directory: /home/luis/Dropbox/OnlineDocuments/HarvardSchoolWork/Fall2015/cs182/project/sample_rouge_data/model_multi.
+summarizer.py(156):         r.system_filename_pattern = 'SetSummary.(\d+).txt'
+summarizer.py(157):         r.model_filename_pattern = 'SetSummary.#ID#.[A-Z].txt'
+summarizer.py(159):         output = r.convert_and_evaluate()
+ --- modulename: process, funcname: current_process
+process.py(63):     return _current_process
+ --- modulename: process, funcname: name
+process.py(163):         return self._name
+ --- modulename: process, funcname: current_process
+process.py(63):     return _current_process
+ --- modulename: process, funcname: name
+process.py(163):         return self._name
+ --- modulename: file_utils, funcname: process
+file_utils.py(20):         if not os.path.exists(output_dir):
+file_utils.py(22):         logger = log.get_global_console_logger()
+ --- modulename: log, funcname: get_global_console_logger
+log.py(17):     return get_console_logger('global')
+ --- modulename: log, funcname: get_console_logger
+log.py(5):     logFormatter = logging.Formatter(
+log.py(6):         "%(asctime)s [%(threadName)-12.12s] [%(levelname)-5.5s]  %(message)s")
+log.py(7):     logger = logging.getLogger(name)
+log.py(8):     if not logger.handlers:
+log.py(13):     return logger
+file_utils.py(23):         logger.info("Processing files in {}.".format(input_dir))
+ --- modulename: process, funcname: current_process
+process.py(63):     return _current_process
+ --- modulename: process, funcname: name
+process.py(163):         return self._name
+file_utils.py(24):         input_file_names = os.listdir(input_dir)
+file_utils.py(25):         for input_file_name in input_file_names:
+file_utils.py(26):             logger.info("Processing {}.".format(input_file_name))
+ --- modulename: process, funcname: current_process
+process.py(63):     return _current_process
+ --- modulename: process, funcname: name
+process.py(163):         return self._name
+file_utils.py(27):             input_file = os.path.join(input_dir, input_file_name)
+file_utils.py(28):             with codecs.open(input_file, "r", encoding="UTF-8") as f:
+file_utils.py(29):                 input_string = f.read()
+file_utils.py(30):             output_string = function(input_string)
+file_utils.py(31):             output_file = os.path.join(output_dir, input_file_name)
+file_utils.py(32):             with codecs.open(output_file, "w", encoding="UTF-8") as f:
+file_utils.py(33):                 f.write(output_string)
+file_utils.py(25):         for input_file_name in input_file_names:
+file_utils.py(34):         logger.info("Saved processed files to {}.".format(output_dir))
+ --- modulename: process, funcname: current_process
+process.py(63):     return _current_process
+ --- modulename: process, funcname: name
+process.py(163):         return self._name
+ --- modulename: file_utils, funcname: process
+file_utils.py(20):         if not os.path.exists(output_dir):
+file_utils.py(22):         logger = log.get_global_console_logger()
+ --- modulename: log, funcname: get_global_console_logger
+log.py(17):     return get_console_logger('global')
+ --- modulename: log, funcname: get_console_logger
+log.py(5):     logFormatter = logging.Formatter(
+log.py(6):         "%(asctime)s [%(threadName)-12.12s] [%(levelname)-5.5s]  %(message)s")
+log.py(7):     logger = logging.getLogger(name)
+log.py(8):     if not logger.handlers:
+log.py(13):     return logger
+file_utils.py(23):         logger.info("Processing files in {}.".format(input_dir))
+ --- modulename: process, funcname: current_process
+process.py(63):     return _current_process
+ --- modulename: process, funcname: name
+process.py(163):         return self._name
+file_utils.py(24):         input_file_names = os.listdir(input_dir)
+file_utils.py(25):         for input_file_name in input_file_names:
+file_utils.py(26):             logger.info("Processing {}.".format(input_file_name))
+ --- modulename: process, funcname: current_process
+process.py(63):     return _current_process
+ --- modulename: process, funcname: name
+process.py(163):         return self._name
+file_utils.py(27):             input_file = os.path.join(input_dir, input_file_name)
+file_utils.py(28):             with codecs.open(input_file, "r", encoding="UTF-8") as f:
+file_utils.py(29):                 input_string = f.read()
+file_utils.py(30):             output_string = function(input_string)
+file_utils.py(31):             output_file = os.path.join(output_dir, input_file_name)
+file_utils.py(32):             with codecs.open(output_file, "w", encoding="UTF-8") as f:
+file_utils.py(33):                 f.write(output_string)
+file_utils.py(25):         for input_file_name in input_file_names:
+file_utils.py(26):             logger.info("Processing {}.".format(input_file_name))
+ --- modulename: process, funcname: current_process
+process.py(63):     return _current_process
+ --- modulename: process, funcname: name
+process.py(163):         return self._name
+file_utils.py(27):             input_file = os.path.join(input_dir, input_file_name)
+file_utils.py(28):             with codecs.open(input_file, "r", encoding="UTF-8") as f:
+file_utils.py(29):                 input_string = f.read()
+file_utils.py(30):             output_string = function(input_string)
+file_utils.py(31):             output_file = os.path.join(output_dir, input_file_name)
+file_utils.py(32):             with codecs.open(output_file, "w", encoding="UTF-8") as f:
+file_utils.py(33):                 f.write(output_string)
+file_utils.py(25):         for input_file_name in input_file_names:
+file_utils.py(26):             logger.info("Processing {}.".format(input_file_name))
+ --- modulename: process, funcname: current_process
+process.py(63):     return _current_process
+ --- modulename: process, funcname: name
+process.py(163):         return self._name
+file_utils.py(27):             input_file = os.path.join(input_dir, input_file_name)
+file_utils.py(28):             with codecs.open(input_file, "r", encoding="UTF-8") as f:
+file_utils.py(29):                 input_string = f.read()
+file_utils.py(30):             output_string = function(input_string)
+file_utils.py(31):             output_file = os.path.join(output_dir, input_file_name)
+file_utils.py(32):             with codecs.open(output_file, "w", encoding="UTF-8") as f:
+file_utils.py(33):                 f.write(output_string)
+file_utils.py(25):         for input_file_name in input_file_names:
+file_utils.py(26):             logger.info("Processing {}.".format(input_file_name))
+ --- modulename: process, funcname: current_process
+process.py(63):     return _current_process
+ --- modulename: process, funcname: name
+process.py(163):         return self._name
+file_utils.py(27):             input_file = os.path.join(input_dir, input_file_name)
+file_utils.py(28):             with codecs.open(input_file, "r", encoding="UTF-8") as f:
+file_utils.py(29):                 input_string = f.read()
+file_utils.py(30):             output_string = function(input_string)
+file_utils.py(31):             output_file = os.path.join(output_dir, input_file_name)
+file_utils.py(32):             with codecs.open(output_file, "w", encoding="UTF-8") as f:
+file_utils.py(33):                 f.write(output_string)
+file_utils.py(25):         for input_file_name in input_file_names:
+file_utils.py(34):         logger.info("Saved processed files to {}.".format(output_dir))
+ --- modulename: process, funcname: current_process
+process.py(63):     return _current_process
+ --- modulename: process, funcname: name
+process.py(163):         return self._name
+ --- modulename: utf_8, funcname: decode
+utf_8.py(16):     return codecs.utf_8_decode(input, errors, True)
+ --- modulename: utf_8, funcname: decode
+utf_8.py(16):     return codecs.utf_8_decode(input, errors, True)
+ --- modulename: utf_8, funcname: decode
+utf_8.py(16):     return codecs.utf_8_decode(input, errors, True)
+ --- modulename: utf_8, funcname: decode
+utf_8.py(16):     return codecs.utf_8_decode(input, errors, True)
+ --- modulename: utf_8, funcname: decode
+utf_8.py(16):     return codecs.utf_8_decode(input, errors, True)
+ --- modulename: process, funcname: current_process
+process.py(63):     return _current_process
+ --- modulename: process, funcname: name
+process.py(163):         return self._name
+ --- modulename: process, funcname: current_process
+process.py(63):     return _current_process
+ --- modulename: process, funcname: name
+process.py(163):         return self._name
+ --- modulename: utf_8, funcname: decode
+utf_8.py(16):     return codecs.utf_8_decode(input, errors, True)
+summarizer.py(161):         print output
+---------------------------------------------
+1 ROUGE-1 Average_R: 0.58580 (95%-conf.int. 0.58580 - 0.58580)
+1 ROUGE-1 Average_P: 0.59879 (95%-conf.int. 0.59879 - 0.59879)
+1 ROUGE-1 Average_F: 0.59222 (95%-conf.int. 0.59222 - 0.59222)
+---------------------------------------------
+1 ROUGE-2 Average_R: 0.40954 (95%-conf.int. 0.40954 - 0.40954)
+1 ROUGE-2 Average_P: 0.41870 (95%-conf.int. 0.41870 - 0.41870)
+1 ROUGE-2 Average_F: 0.41407 (95%-conf.int. 0.41407 - 0.41407)
+---------------------------------------------
+1 ROUGE-3 Average_R: 0.35471 (95%-conf.int. 0.35471 - 0.35471)
+1 ROUGE-3 Average_P: 0.36270 (95%-conf.int. 0.36270 - 0.36270)
+1 ROUGE-3 Average_F: 0.35866 (95%-conf.int. 0.35866 - 0.35866)
+---------------------------------------------
+1 ROUGE-4 Average_R: 0.32323 (95%-conf.int. 0.32323 - 0.32323)
+1 ROUGE-4 Average_P: 0.33058 (95%-conf.int. 0.33058 - 0.33058)
+1 ROUGE-4 Average_F: 0.32686 (95%-conf.int. 0.32686 - 0.32686)
+---------------------------------------------
+1 ROUGE-L Average_R: 0.35492 (95%-conf.int. 0.35492 - 0.35492)
+1 ROUGE-L Average_P: 0.57460 (95%-conf.int. 0.57460 - 0.57460)
+1 ROUGE-L Average_F: 0.43880 (95%-conf.int. 0.43880 - 0.43880)
+---------------------------------------------
+1 ROUGE-W-1.2 Average_R: 0.12326 (95%-conf.int. 0.12326 - 0.12326)
+1 ROUGE-W-1.2 Average_P: 0.37747 (95%-conf.int. 0.37747 - 0.37747)
+1 ROUGE-W-1.2 Average_F: 0.18584 (95%-conf.int. 0.18584 - 0.18584)
+
+ --- modulename: trace, funcname: _unsettrace
+trace.py(80):         sys.settrace(None)
+
+\end{lstlisting}
+
+For other tracebacks, we provide the results. Note that the syntax for the provided \verb|tracer.py| program 
 
 \section{System Description}
+For a more detailed description of how to run our system, please take a look at the README.md file in the \href{https://github.com/kandluis/document_summaries}{github repository}. Note that for a short summary of what's presented below, the \verb|--help| flag will be handy.
 
- Appendix 2 – A clear description of how to use your system and how to generate the output you discussed in the write-up and the example transcript in Appendix 1. N.B.: The teaching staff must be able to run your system.
+\subsection{DUC 2004 Sample Data}
+\label{subsec:duc_sample_data}
+We now provided a short description on how to generate some of the sample summaries presented in the text, which are included in the github repository. Note that the commands presented below should be runnable directly as soon as the repository is cloned and a the appropriate requirements fulfilled. 
+
+\begin{enumerate}
+\item Clone the github repository using 
+\begin{lstlisting}[language=Python, caption="Git Clone Command"]
+git clone git@github.com:kandluis/document_summaries.git
+\end{lstlisting}
+\item See \verb|README.md| for details on the required packages. At minimum, 
+\begin{enumerate}
+\item Install \href{http://www.nltk.org/}{NLTK}
+\item Install \href{http://www.numpy.org/}{numpy}
+\end{enumerate}
+\item The trace described in Appendix \ref{sec:program_trace} can be executed with the command:
+\begin{verbatim}
+python tracer.py --data_dir=sample_rouge_data --algorithm=grasshopper --rouge_score=True --summarize=True --debug=True > trace.out
+\end{verbatim}
+\item For other sample commands, the general format, after installation:
+\begin{verbatim}
+python -m summarizer --data_dir=sample_rouge_data --algorithm=ALGORITHM --summarize=True --rouge_score=False --debug=True --summary_length=5
+\end{verbatim}
+The above command, with the appropriate substitution of \verb|ALGORITHM| with one of \{GrassHopper,  FirstGeomPrior, Baseline, GeomPrior, Frequency, TextRank \}. The command will take the input sample data contained in the \verb|sameple_rouge_data/docs/| directory \footnote{As of the time of the writing of this paper, the data contained consists of a single collection from the DUC 2004 Task 1/2 data set. The set selected consists of ID 30001.}
+\end{enumerate}
+For more assistance on how to run the program, see the \verb|README.md| or run the summarizer with the \verb|--help| flag to receive more details \footnote{Note that the system attempts to generate, by default, summaries containing 665 characters.}.
+
+As per the \verb|README.md|, note that it is further possible to verify the presented results by running the system directly, with new summaries, and calculating the ROUGE scores in comparison to the model summaries \footnote{The model summaries are obtained from the DUC 2003 conference. They can also be found directly here:\href{https://www.dropbox.com/sh/dzmzh5nwe1i68ra/AABYPkOj6lXZln5I6tEDjpAna?dl=0}{https://www.dropbox.com/sh/dzmzh5nwe1i68ra/AABYPkOj6lXZln5I6tEDjpAna?dl=0}}. While we do not recommend taking this approach, due to the level of difficulty, 
+
+\subsection{Standard Input}
+\label{subsec:standard_input}
+An alternative method for running the system which does not require initial data consists of summarizing single documents through the use of the commandline interface itself. Suppose we have the following in a text file \verb|sample.txt|:
+\begin{verbatim}
+Use short sentences to create punch and make a point.
+Use phrases and even words as sentences. Really.
+Do not use too many sentences -- about three or four is usually enough.
+Use a short sentence as a summary after a longer description.
+Generally speaking, a short sentence works well at the start of a paragraph or speech item to grab attention, and at the end, to summarize and signal completion.
+\end{verbatim}
+We can create a simple 1-sentence summary with the command:
+\begin{verbatim}
+python -m summarizer --algorithm=ALGORITHM --rouge_score=False --summarize=True --debug=True -k 1 < sample.txt
+\end{verbatim}
+We present the results of the above command for each for the algorithms:
+\begin{enumerate}
+\item {\sc Baseline}: Use short sentences to create punch and make a point.
+\item {\sc GeomPrior}: Generally speaking, a short sentence works well at the start of a paragraph or speech item to grab attention, and at the end, to summarize and signal completion. \footnote{Not deterministic.}
+\item {\sc FirstGeomPrior}: Use short sentences to create punch and make a point.
+\item {\sc Frequency}: Use short sentences to create punch and make a point.
+\item {\sc Grasshopper }: Use short sentences to create punch and make a point.
+\item {\sc TextRank}: Generally speaking, a short sentence works well at the start of a paragraph or speech item to grab attention, and at the end, to summarize and signal completion.
+\end{enumerate}
+Note, however, that the system does not provide an evaluation for the quality of the score under these circumstances. In order to receive ROUGE metric, the system must be run with as described in Append \ref{subsec:duc_sample_data}.
 
 \section{Group Makeup}
-
- Appendix 3 – A list of each project participant and that
-participant’s contributions to the project. If the division of work
-varies significantly from the project proposal, provide a brief
-explanation.  Your code should be clearly documented. 
-
+Our project groups consists of two individuals, Kevin Eskici and Luis A. Perez. The work was divided fairly evenly, and as described in our original proposal, with no major modifications. In detail, we have the below:
+\begin{enumerate}
+\item Luis Antonio Perez. The tasks are listed in order of importance/difficulty.
+\begin{itemize}
+\item Main Task: Understand and implement the {\sc GrassHopper} as described by Zhu et al. \cite{grasshopper}. 
+\item Explore the parameter space for {\sc GrassHopper} and optimize the parameters on the DUC 2004 data using ROUGE as a sample metric. 
+\item Improve upon basic implementation of the baselines, and incorporate the results into the general framework.
+\item Understand ROUGE and ROUGE scores \cite{rouge}.
+\item Generate a general framework for testing our differing algorithms with the use of ROUGE.
+\item Generalize framework and add options for easy of use.
+\item Create a usable, testable system, which involves writing code to clean and parse the original data automatically, as well as code to help with structuring the overall layout of the project.
+\end{itemize}
+\item Kevin Eskici
+\begin{itemize}
+\item Main Task: Understand and implement the {\sc TextRank} algorithm, as described by 
+\end{itemize}
+\end{enumerate}
+The code for the project is completely open source and can be found on \href{https://github.com/kandluis/document_summaries}{github}. Requests for access to the processed data summaries for DUC 2004 can be sent to \href{mailto:luis.perez.live@gmail.com}{luis.perez.live@gmail.com}. The data cannot be made public due to copyright restrictions. However, the data can be made available upon request.
 
 
 \bibliographystyle{plain} 
-\bibliography{../references}
+\bibliography{references}
 
 \end{document}

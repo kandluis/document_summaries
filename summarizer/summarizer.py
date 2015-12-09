@@ -27,7 +27,8 @@ argsToAlgo = {
     'firstgeomprior':   baselines.modifiedGeomPriorBaseline,
     'frequency':   baselines.wordFreqBaseline,
     'textrank': textrank.textRank,
-    'grasshopper':   grasshopper.run_grassHopper
+    'grasshopper':   grasshopper.run_grassHopper,
+    'modifiedgrasshopper': grasshopper.run_modified_grasshopper
 }
 
 
@@ -57,10 +58,15 @@ def parseArgs(parser):
     parser.add_argument("-k", "--summary_length", default=5,
                         help="Sentence length of output summary. Note that a summary" +
                         " might be truncated to be shorter than this length.")
-    parser.add_argument("-b", "--bytes", default=665,
+    parser.add_argument("-b", "--bytes", default=-1,
                         help="Byte length of output summary. All output summaries" +
                         " will be truncated at this length if written out to a file." +
-                        "A value of -1 will avoid almost all truncation (except the last character).")
+                        "A value of -1 will avoid almost all truncation (except " +
+                        "the last character). If you're setting this, you likely also " +
+                        "want to set SUMMARY_LENGTH to some large value.")
+    parser.add_argument("--rouge_folder", default="cs182_data/programs/RELEASE-1.5.5",
+                        help="Folder Containing the ROUGE Perl Executables. " +
+                        "It must be provided if ROUGE is to be used.")
 
 
 def createSummaries(sum_algo, abs_path, out_path, k=5, bytes=665, multiDocument=False):
@@ -86,7 +92,7 @@ def createSummaries(sum_algo, abs_path, out_path, k=5, bytes=665, multiDocument=
     # Pass this to the algorithm which should return the summary as
     # a list of sentences.
     if multiDocument:
-        summary = sum_algo(D, k, bytes)
+        summary = sum_algo(D, k)
         # Write out the summary
         filepath = os.path.join(out_path, "SetSummary.{}.txt".format(setID))
         with open(filepath, 'w+') as out:
@@ -108,6 +114,7 @@ def run(opts):
     '''
     base = None if opts.data_dir is None else os.path.abspath(opts.data_dir)
     debug = opts.debug.lower() == 'true'
+    bytes = int(opts.bytes)
 
     if opts.summarize.lower() == 'true':
         try:
@@ -121,9 +128,9 @@ def run(opts):
     outpath = None if base is None else os.path.join(base, opts.algorithm)
     if opts.summarize.lower() == 'true':
         k = int(opts.summary_length)
-        bytes = int(opts.bytes)
         if base is None:
-            print algorithm([sys.stdin.readlines()], k, bytes)
+            print "\n".join([s.strip() for s in algorithm(
+                [sys.stdin.readlines()], k)][:k])
             return
         # Create directory if it does not exist
         if not os.path.exists(outpath):
@@ -136,7 +143,7 @@ def run(opts):
             inpath = os.path.join(inbase, folder)
             try:
                 createSummaries(algorithm, inpath, outpath,
-                                k=k, bytes=bytes, multiDocument=True)
+                                k=k, multiDocument=True)
             except Exception as e:
                 print "Failed with {}".format(inpath)
                 if debug:
@@ -146,7 +153,22 @@ def run(opts):
     # Currently only handles multiple documents!
     if base is not None and opts.rouge_score == 'True':
         import pyrouge
-        r = pyrouge.Rouge155(bytes=bytes)
+        # NOTE THAT WE MUST CONSTRUCT THE ARGUMENTS TO ROUGE OURSELF
+        rouge_dir = os.path.abspath(opts.rouge_folder)
+        options = [
+            '-e', os.path.join(rouge_dir, 'data'),
+            '-b', bytes,
+            '-c', 95,
+            '-n', 4,
+            '-w', 1.2,
+            '-a',
+            '-f', 'A',
+            '-p', 0.5,
+            '-t', 0
+        ]
+        args = " ".join(map(str, options))
+
+        r = pyrouge.Rouge155(rouge_dir=rouge_dir, rouge_args=args)
         r.system_dir = outpath
         if debug:
             print "System Directory: {}.".format(r.system_dir)

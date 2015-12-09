@@ -165,11 +165,53 @@ def grasshopper(W, r, lamb, k, epsilon=0.0001):
     return zip(absorbed, probs)
 
 
-def run_grassHopper(D, k, bytes=665):
+def modifiedGrasshopper(W, r, lamb, k, epsilon=0.0001):
+    '''
+    Implements a modified version of the Grasshopper algorithm which
+    follows the same procedure but rather than creating an absorbing state
+    at each step, changes the outgoing probability of the selected sentence
+    so it is distributed uniformly among all other sentences.
+    '''
+    # Let's do some basis error checking!
+    n, m = W.shape
+    assert n == m  # Sizes should be equal
+    assert np.min(W) >= 0  # No negative edges
+    assert abs(np.sum(r) - 1) < epsilon  # r is a distribution
+    assert 0 <= lamb and lamb <= 1  # lambda is valid
+    assert 0 < k and k <= n  # Summary can't be longer than document!
+
+    # Normalize the rows of W to create the transition matrix P'
+    P = W / np.sum(W, axis=1)
+    hatP = lamb * P + (1 - lamb) * r
+
+    assert hatP.shape == (n, m)  # Shape should not change!
+
+    # Select sentences based on the most probable stationary state
+    selected = []
+    probs = []
+    while (len(selected) < k):
+        q = stationary(hatP)
+        # We don't want to select any previously selected sentences
+        q[selected] = 0
+        state = np.argmax(q)
+        selected.append(state)
+        probs.append(q[state])
+
+        # Modify the matrix so the weight is distributed uniformly to all
+        # other sentences.
+        out = np.ones(len(P)) / (len(P) - 1)
+        out[state] = 0.
+        hatP[state, :] = out
+
+    return zip(selected, probs)
+
+
+def run_abstract(D, k, algo):
     '''
     Runs the optimized grasshopper algorithm.
 
     This is the main API for the Grasshopper algorithms.
+
     '''
     D = [s for d in D for s in d]
 
@@ -183,7 +225,7 @@ def run_grassHopper(D, k, bytes=665):
     lamb = 0.5
     alpha = 0.25
     r = utils.decayDistribution(alpha, len(WClean))
-    results = grasshopper(WClean, r, lamb, k)
+    results = algo(WClean, r, lamb, k)
 
     # Extract the summary
     summary = []
@@ -191,3 +233,11 @@ def run_grassHopper(D, k, bytes=665):
         summary.append(D[i])
 
     return summary
+
+
+def run_modified_grasshopper(D, k):
+    return run_abstract(D, k, modifiedGrasshopper)
+
+
+def run_grassHopper(D, k):
+    return run_abstract(D, k, grasshopper)
