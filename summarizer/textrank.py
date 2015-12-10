@@ -80,8 +80,9 @@ def modifiedTextRank(D, k):
     scores = [1.0] * len(sentences)
     summary = []
     summary_words = set()
-
     while len(summary) < min(k, len(sentences)):
+        scores = [1.0] * len(sentences)
+
         filtered_sentences = [[word[0].lower() for word in sentence
                                if word[0] not in stop and word[1] in
                                ['NN', 'JJ', 'VB', 'NP', 'NNS', 'RB', 'VBN', 'VBG'] 
@@ -103,6 +104,4 @@ def modifiedTextRank(D, k):
         summary.append(new_sent)
         summary_words = summary_words.union(sentences[new_sent])
 
-    summary_sents = [index for (score, index) in sorted([(scores[i], i)
-                                                                for i in xrange(len(scores))], reverse=True)[:k]]
-    return summary_sents, D, mapping
+    return summary, D, mapping
