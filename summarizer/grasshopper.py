@@ -220,7 +220,7 @@ def run_abstract(D, k, algo):
     WClean = docToMatrix(
         cleanDoc, sim_fun=utils.threshHoldCosineSim)
 
-    # According to the paper, alpha = 0.25 and lambda = 0.5 where the
+    # According to the paper, alpha = 0.25 and lambda = 0.5 were the
     # best parameters
     lamb = 0.5
     alpha = 0.25
@@ -229,7 +229,7 @@ def run_abstract(D, k, algo):
 
     # Extract the summary
     summary = []
-    for (i, p) in sorted(results, key=lambda x: x[0]):
+    for (i, p) in results:
         summary.append(D[i])
 
     return summary
