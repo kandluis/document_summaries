@@ -18,7 +18,6 @@ from nltk.corpus import stopwords
 
 # similarity function
 
-
 def sent_sim(s1, s2):
     common = float(sum([word in s2 for word in s1]))
     if common == 0:
@@ -69,10 +68,8 @@ def textRank(D, k):
             scores[node] = score_sentence(G, node, 0.85, scores)
             if abs(scores[node] - old_score) > 0.01:
                 converged = False
-    print iters
     summary_sents = [index for (score, index) in sorted([(scores[i], i)
                                                                 for i in xrange(len(scores))], reverse=True)[:k]]
-    print summary_sents
     return summary_sents, D, mapping
 
 
@@ -106,7 +103,7 @@ def modifiedTextRank(D, k):
             for node in xrange(len(sentences)):
                 old_score = scores[node]
                 scores[node] = score_sentence(G, node, 0.85, scores)
-                if abs(scores[node] - old_score) > 0.0001:
+                if abs(scores[node] - old_score) > 0.01:
                     converged = False
         new_sent = sorted([(scores[i], i) for i in xrange(len(scores))], reverse=True)[0][1]
         summary.append(new_sent)
