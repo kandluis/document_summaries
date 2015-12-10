@@ -12,6 +12,8 @@ Kevin Eskici (keskici@college.harvard.edu)
 from . import utils
 import numpy as np
 
+import pdb
+
 
 def stationary(Mat, epsilon=0.01):
     '''
@@ -159,7 +161,10 @@ def grasshopper(W, r, lamb, k, epsilon=0.0001):
         absorbed.append(absorbState)
         probs.append(absorbVisit)
 
-        nonAbsorbed.remove(absorbState)
+        try:
+            nonAbsorbed.remove(absorbState)
+        except ValueError:
+            pdb.set_trace()
 
     # Return the results!
     return absorbed
