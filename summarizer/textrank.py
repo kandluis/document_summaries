@@ -64,10 +64,10 @@ def textRank(D, k):
             if abs(scores[node] - old_score) > 0.0001:
                 converged = False
 
-    summary_sents = sorted([index for (score, index) in sorted([(scores[i], i)
-                                                                for i in xrange(len(scores))], reverse=True)[:k]])
+    summary_sents = [index for (score, index) in sorted([(scores[i], i)
+                                                                for i in xrange(len(scores))], reverse=True)[:k]]
 
-    return [D[mapping[i]] for i in summary_sents]
+    return summary_sents, D, mapping
 
 
 def modifiedTextRank(D, k):
@@ -105,4 +105,4 @@ def modifiedTextRank(D, k):
 
     summary_sents = [index for (score, index) in sorted([(scores[i], i)
                                                                 for i in xrange(len(scores))], reverse=True)[:k]]
-    return [D[mapping[i]] for i in summary_sents]
+    return summary_sents, D, mapping

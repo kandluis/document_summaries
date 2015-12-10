@@ -31,7 +31,8 @@ def baseline(D, k):
     Baseline simply takes the first k sentences in the documents.
     '''
     D = concatDocs(D)
-    return D[:k]
+    mapping = {i:i for i in xrange(len(D))}
+    return range(k), D, mapping
 
 
 def geomPriorBaseline(D, k, p=0.02):
@@ -41,9 +42,7 @@ def geomPriorBaseline(D, k, p=0.02):
     probs = probs / sum(probs)
     summary = np.random.choice(xrange(len(sentences)), size=k,
                                replace=False, p=probs)
-    res = [D[mapping[i]] for i in sorted(summary)]
-
-    return res
+    return res, D, mapping
 
 
 def modifiedGeomPriorBaseline(D, k, p=0.02):
@@ -54,9 +53,7 @@ def modifiedGeomPriorBaseline(D, k, p=0.02):
     summary = np.random.choice(xrange(1, len(sentences)), size=k,
                                replace=False, p=probs)
     summary = np.append(0, summary)
-    res = [D[mapping[i]] for i in sorted(summary)]
-
-    return res
+    return res, D, mapping
 
 
 def wordFreqBaseline(D, k):
@@ -69,13 +66,11 @@ def wordFreqBaseline(D, k):
 
     summary = []
     summary_words = set()
-    res = []
-    sent_scores = [sum([freqs[word] for word in sentence
-                        if word not in summary_words]) / len(sentence) for sentence in sentences]
-    selected = sent_scores.index(max(sent_scores))
-    summary.append(selected)
-    summary_words = summary_words.union(sentences[selected])
-    res.append(D[mapping[selected]])
+    while len(summary) < min(k, len(D)):
+        sent_scores = [sum([freqs[word] for word in sentence
+                            if word not in summary_words]) / len(sentence) for sentence in sentences]
+        selected = sent_scores.index(max(sent_scores))
+        summary.append(selected)
+        summary_words = summary_words.union(sentences[selected])
 
-    # print mapping
-    return [D[mapping[i]] for i in sorted(summary)]
+    return summary, D, mapping

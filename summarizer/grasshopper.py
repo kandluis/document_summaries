@@ -7,7 +7,7 @@ Copyright, 2015.
 
 Authors:
 Luis Perez (luis.perez.live@gmail.com)
-Kevin Eskici (keskici@college.harvar.edu)
+Kevin Eskici (keskici@college.harvard.edu)
 '''
 from . import utils
 import numpy as np
@@ -162,7 +162,7 @@ def grasshopper(W, r, lamb, k, epsilon=0.0001):
         nonAbsorbed.remove(absorbState)
 
     # Return the results!
-    return zip(absorbed, probs)
+    return absorbed
 
 
 def modifiedGrasshopper(W, r, lamb, k, epsilon=0.0001):
@@ -203,7 +203,7 @@ def modifiedGrasshopper(W, r, lamb, k, epsilon=0.0001):
         out[state] = 0.
         hatP[state, :] = out
 
-    return zip(selected, probs)
+    return selected
 
 
 def run_abstract(D, k, algo):
@@ -225,14 +225,10 @@ def run_abstract(D, k, algo):
     lamb = 0.5
     alpha = 0.25
     r = utils.decayDistribution(alpha, len(WClean))
-    results = algo(WClean, r, lamb, k)
-
+    summary = algo(WClean, r, lamb, k)
+ 
     # Extract the summary
-    summary = []
-    for (i, p) in sorted(results, key=lambda x: x[0]):
-        summary.append(D[i])
-
-    return summary
+    return summary, D, mapping
 
 
 def run_modified_grasshopper(D, k):
