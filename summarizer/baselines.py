@@ -42,7 +42,7 @@ def geomPriorBaseline(D, k, p=0.02):
     probs = probs / sum(probs)
     summary = np.random.choice(xrange(len(sentences)), size=k,
                                replace=False, p=probs)
-    return res, D, mapping
+    return summary, D, mapping
 
 
 def modifiedGeomPriorBaseline(D, k, p=0.02):
@@ -53,7 +53,21 @@ def modifiedGeomPriorBaseline(D, k, p=0.02):
     summary = np.random.choice(xrange(1, len(sentences)), size=k,
                                replace=False, p=probs)
     summary = np.append(0, summary)
-    return res, D, mapping
+    return summary, D, mapping
+
+def multipleGeomPrior(D, k, p=0.02):
+    probs = []
+    for doc in D:
+        sentences, _ = utils.cleanDocument(doc)
+        docProbs = np.array([geom(p, i) for i in xrange(len(sentences))])
+        docProbs = docProbs / sum(docProbs)
+        probs += list(docProbs)
+    probs = np.array(probs)/sum(probs)
+    D = concatDocs(D)
+    sentences, mapping = utils.cleanDocument(D)
+    summary = np.random.choice(xrange(len(sentences)), size=k,
+                               replace=False, p=probs)
+    return summary, D, mapping
 
 
 def wordFreqBaseline(D, k):
