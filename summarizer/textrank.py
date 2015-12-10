@@ -24,7 +24,11 @@ def sent_sim(s1, s2):
     if common == 0:
         return 0.0
     else:
-        return common / (np.log(len(s1)) + np.log(len(s2)))
+        #check for edge case where both sentences are 1 word
+        if (len(s1) + len(s2)) != 2:
+            return common / (np.log(len(s1)) + np.log(len(s2)))
+        else:
+            return 1
 
 
 def score_sentence(G, v, d, scores):
