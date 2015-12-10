@@ -144,8 +144,9 @@ def run(opts):
         base, opts.algorithm + inputParams)
     if opts.summarize.lower() == 'true':
         if base is None:
-            print "\n".join([s.strip() for s in algorithm(
-                [sys.stdin.readlines()], k)][:k])
+            summary = processSummary(
+                False, *algorithm([sys.stdin.readlines()], k))
+            print "\n".join([s.strip() for s in summary])
             return
         # Create directory if it does not exist
         if not os.path.exists(outpath):
