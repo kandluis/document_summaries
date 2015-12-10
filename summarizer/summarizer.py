@@ -69,9 +69,11 @@ def parseArgs(parser):
     parser.add_argument("--rouge_folder", default="cs182_data/programs/RELEASE-1.5.5",
                         help="Folder Containing the ROUGE Perl Executables. " +
                         "It must be provided if ROUGE is to be used.")
-    parser.add_argument("--sort_sents",  default="False",
+    parser.add_argument("--sort_sents",  default="True",
                         help="Boolean parameter specifying whether sentences " +
-                        "should be sorted or not.")
+                        "should be sorted or not. When using ROUGE, we recommend " +
+                        "that this parameter be set to False in order to allow " +
+                        "for correct determination of the ROUGE score.")
 
 
 def processSummary(sort_sents, sentences, D, mapping):

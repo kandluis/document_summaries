@@ -5,7 +5,7 @@ To see how the program runs, you can execute it with the included DUC 2004 Data.
 For a quick sample run, you can run this command from the root directory:
 
 ```
-python -m summarizer --data_dir=sample_rouge_data --algorithm=grasshopper --rouge_score=True --summarize=True
+python -m summarizer --data_dir=sample_rouge_data --algorithm=grasshopper
 ```
 
 Feel free to change the --algorithm flag to one of the other available and implemented algorithms. Furthermore, if you do not have ROUGE install, the --rouge_score flag must be set to false.
@@ -65,6 +65,12 @@ Program Arguments
 
 -b, --bytes, default=665
   Byte length of output summary. All output summaries will be truncated at this length if written out to a file. A value of -1 will avoid almost all truncation (except the last character).
+
+--rouge_folder", default="cs182_data/programs/RELEASE-1.5.5",
+  Folder Containing the ROUGE Perl Executables. It must be provided if ROUGE is to be used.
+
+--sort_sents",  default="True",
+  Boolean parameter specifying whether sentences should be sorted or not. When using ROUGE, we recommend that this parameter be set to False in order to allow for correct determination of the ROUGE score.
 
 Multi-Document Text Summarization
 =======
