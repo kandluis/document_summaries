@@ -25,8 +25,9 @@ argsToAlgo = {
     'baseline': baselines.baseline,
     'geomprior':   baselines.geomPriorBaseline,
     'firstgeomprior':   baselines.modifiedGeomPriorBaseline,
-    'frequency':   baselines.wordFreqBaseline,
+    'frequency': baselines.wordFreqBaseline,
     'textrank': textrank.textRank,
+    'modifiedtextrank': textrank.modifiedTextRank,
     'grasshopper':   grasshopper.run_grassHopper,
     'modifiedgrasshopper': grasshopper.run_modified_grasshopper
 }
@@ -67,9 +68,18 @@ def parseArgs(parser):
     parser.add_argument("--rouge_folder", default="cs182_data/programs/RELEASE-1.5.5",
                         help="Folder Containing the ROUGE Perl Executables. " +
                         "It must be provided if ROUGE is to be used.")
+    parser.add_argument("--sort_sents",  default=False,
+                        help="Boolean parameter specifying whether sentences " +
+                        "should be sorted or not.")
 
 
-def createSummaries(sum_algo, abs_path, out_path, k=5, bytes=665, multiDocument=False):
+def processSummary(sort_sents, sentences, D, mapping):
+    if sort_sents:
+        sentences = sorted(sentences)
+    return [D[mapping[i]] for i in sentences]
+
+
+def createSummaries(sum_algo, abs_path, out_path, sort_sents, k=5, bytes=665, multiDocument=False):
     # Extracted from the input folder name
     setID = abs_path.split('/')[-1]
 
@@ -92,7 +102,8 @@ def createSummaries(sum_algo, abs_path, out_path, k=5, bytes=665, multiDocument=
     # Pass this to the algorithm which should return the summary as
     # a list of sentences.
     if multiDocument:
-        summary = sum_algo(D, k)
+        summary = processSummary(sort_sents, *sum_algo(D, k))
+
         # Write out the summary
         filepath = os.path.join(out_path, "SetSummary.{}.txt".format(setID))
         with open(filepath, 'w+') as out:
@@ -100,7 +111,7 @@ def createSummaries(sum_algo, abs_path, out_path, k=5, bytes=665, multiDocument=
             out.write(res[:bytes])
     else:
         for i in range(len(D)):
-            summary = sum_algo([D[i]], k)
+            summary = processSummary(sort_sents, sum_algo([D[i]], k))
             filepath = os.path.join(
                 out_path, "Summary.{}.txt".format(docIDs[i]))
             with open(filepath, 'w+') as out:
@@ -115,6 +126,8 @@ def run(opts):
     base = None if opts.data_dir is None else os.path.abspath(opts.data_dir)
     debug = opts.debug.lower() == 'true'
     bytes = int(opts.bytes)
+    sort_sents = opts.sort_sents.lower() == 'true'
+    k = int(opts.summary_length)
 
     if opts.summarize.lower() == 'true':
         try:
@@ -125,9 +138,10 @@ def run(opts):
     else:
         algorithm = opts.algorithm
 
-    outpath = None if base is None else os.path.join(base, opts.algorithm)
+    inputParams = "_sorted={}_k={}_bytes={}".format(sort_sents, k, bytes)
+    outpath = None if base is None else os.path.join(
+        base, opts.algorithm + inputParams)
     if opts.summarize.lower() == 'true':
-        k = int(opts.summary_length)
         if base is None:
             print "\n".join([s.strip() for s in algorithm(
                 [sys.stdin.readlines()], k)][:k])
@@ -142,7 +156,7 @@ def run(opts):
         for folder in folders:
             inpath = os.path.join(inbase, folder)
             try:
-                createSummaries(algorithm, inpath, outpath,
+                createSummaries(algorithm, inpath, outpath, sort_sents,
                                 k=k, multiDocument=True)
             except Exception as e:
                 print "Failed with {}".format(inpath)
