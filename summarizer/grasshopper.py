@@ -154,7 +154,6 @@ def grasshopper(W, r, lamb, k, epsilon=0.0001):
         nuvisit = np.sum(N, axis=1)
         nvisit = np.zeros(n)
         nvisit[nonAbsorbed] = nuvisit
-        nvisit[absorbed] = min(nvisit) - 1
 
         # Find the new absorbing state
         absorbState = np.argmax(nvisit)
@@ -163,10 +162,7 @@ def grasshopper(W, r, lamb, k, epsilon=0.0001):
         absorbed.append(absorbState)
         probs.append(absorbVisit)
 
-        try:
-            nonAbsorbed.remove(absorbState)
-        except ValueError:
-            pdb.set_trace()
+        nonAbsorbed.remove(absorbState)
 
     # Return the results!
     return absorbed

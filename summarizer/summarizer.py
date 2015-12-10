@@ -100,7 +100,7 @@ def createSummaries(sum_algo, abs_path, out_path, sort_sents, k=5, bytes=665, mu
             with open(filepath) as inputDoc:
                 text = inputDoc.read().strip()
                 sentences = tokenizer.tokenize(text)
-                D.append(sentences)
+                D.append(sentences.split(" "))
 
     # Pass this to the algorithm which should return the summary as
     # a list of sentences.
