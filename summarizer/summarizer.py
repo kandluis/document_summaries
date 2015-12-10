@@ -110,7 +110,7 @@ def createSummaries(sum_algo, abs_path, out_path, sort_sents, k=5, bytes=665, mu
         # Write out the summary
         filepath = os.path.join(out_path, "SetSummary.{}.txt".format(setID))
         with open(filepath, 'w+') as out:
-            res = "\n".join([s.strip() for s in summary])
+            res = "\n".join([" ".join(s).strip() for s in summary])
             out.write(res[:bytes])
     else:
         for i in range(len(D)):
@@ -118,7 +118,7 @@ def createSummaries(sum_algo, abs_path, out_path, sort_sents, k=5, bytes=665, mu
             filepath = os.path.join(
                 out_path, "Summary.{}.txt".format(docIDs[i]))
             with open(filepath, 'w+') as out:
-                res = "\n".join([s.strip() for s in summary])
+                res = "\n".join([" ".join(s).strip() for s in summary])
                 out.write(res[:bytes])
 
 

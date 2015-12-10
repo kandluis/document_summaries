@@ -140,6 +140,8 @@ def grasshopper(W, r, lamb, k, epsilon=0.0001):
     probs.append(np.max(q))
     nonAbsorbed.remove(np.argmax(q))
 
+    pdb.set_trace()
+
     # Pick the ramaining k-1 items by picking out the most-visited node one by
     # one. once picked out, the item turns into an absorbing node.
     while (len(absorbed) < k):
@@ -220,6 +222,7 @@ def run_abstract(D, k, algo):
 
     # Clean the document
     cleanDoc, mapping = utils.cleanDocument(D)
+    pdb.set_trace()
     WClean = docToMatrix(
         cleanDoc, sim_fun=utils.threshHoldCosineSim)
 
