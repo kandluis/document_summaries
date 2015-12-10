@@ -160,7 +160,7 @@ def run(opts):
         for folder in folders:
             inpath = os.path.join(inbase, folder)
             try:
-                createSummaries(algorithm, inpath, outpath, sort_sents,
+                createSummaries(algorithm, inpath, outpath, sort_sents, bytes=bytes
                                 k=k, multiDocument=True)
             except Exception as e:
                 print "Failed with {}".format(inpath)
