@@ -18,7 +18,6 @@ from nltk.corpus import stopwords
 
 # similarity function
 
-
 def sent_sim(s1, s2):
     common = float(sum([word in s2 for word in s1]))
     if common == 0:
@@ -60,17 +59,17 @@ def textRank(D, k):
         G[i][j] = sent_sim(filtered_sentences[i], filtered_sentences[j])
 
     converged = False
-    while not converged:
+    iters = 0
+    while not converged and iters < 30:
+        iters += 1
         converged = True
         for node in xrange(len(sentences)):
             old_score = scores[node]
             scores[node] = score_sentence(G, node, 0.85, scores)
-            if abs(scores[node] - old_score) > 0.0001:
+            if abs(scores[node] - old_score) > 0.01:
                 converged = False
-
     summary_sents = [index for (score, index) in sorted([(scores[i], i)
                                                                 for i in xrange(len(scores))], reverse=True)[:k]]
-
     return summary_sents, D, mapping
 
 
@@ -97,15 +96,18 @@ def modifiedTextRank(D, k):
             G[i][j] = sent_sim(filtered_sentences[i], filtered_sentences[j])
 
         converged = False
-        while not converged:
+        iters = 0
+        while not converged and iters < 30:
+            iters += 1
             converged = True
             for node in xrange(len(sentences)):
                 old_score = scores[node]
                 scores[node] = score_sentence(G, node, 0.85, scores)
-                if abs(scores[node] - old_score) > 0.0001:
+                if abs(scores[node] - old_score) > 0.01:
                     converged = False
         new_sent = sorted([(scores[i], i) for i in xrange(len(scores))], reverse=True)[0][1]
         summary.append(new_sent)
         summary_words = summary_words.union(sentences[new_sent])
+
 
     return summary, D, mapping
