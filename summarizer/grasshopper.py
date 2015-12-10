@@ -136,11 +136,10 @@ def grasshopper(W, r, lamb, k, epsilon=0.0001):
 
     # Calculate the most probable state!
     q = stationary(hatP)
-    absorbed.append(np.argmax(q))
+    maxState = np.argmax(q)
+    absorbed.append(maxState)
     probs.append(np.max(q))
-    nonAbsorbed.remove(np.argmax(q))
-
-    pdb.set_trace()
+    nonAbsorbed.remove(maxState)
 
     # Pick the ramaining k-1 items by picking out the most-visited node one by
     # one. once picked out, the item turns into an absorbing node.
@@ -153,7 +152,7 @@ def grasshopper(W, r, lamb, k, epsilon=0.0001):
             np.identity(len(nonAbsorbed)) - hatP[nonAbsorbed, nonAbsorbed])
 
         # Compute the expected visit counts
-        nuvisit = np.sum(N, axis=1)
+        nuvisit = np.sum(N, axis=0)
         nvisit = np.zeros(n)
         nvisit[nonAbsorbed] = nuvisit
 
@@ -222,7 +221,6 @@ def run_abstract(D, k, algo):
 
     # Clean the document
     cleanDoc, mapping = utils.cleanDocument(D)
-    pdb.set_trace()
     WClean = docToMatrix(
         cleanDoc, sim_fun=utils.threshHoldCosineSim)
 
