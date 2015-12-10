@@ -69,9 +69,11 @@ def parseArgs(parser):
     parser.add_argument("--rouge_folder", default="cs182_data/programs/RELEASE-1.5.5",
                         help="Folder Containing the ROUGE Perl Executables. " +
                         "It must be provided if ROUGE is to be used.")
-    parser.add_argument("--sort_sents",  default="False",
+    parser.add_argument("--sort_sents",  default="True",
                         help="Boolean parameter specifying whether sentences " +
-                        "should be sorted or not.")
+                        "should be sorted or not. When using ROUGE, we recommend " +
+                        "that this parameter be set to False in order to allow " +
+                        "for correct determination of the ROUGE score.")
 
 
 def processSummary(sort_sents, sentences, D, mapping):
@@ -98,7 +100,7 @@ def createSummaries(sum_algo, abs_path, out_path, sort_sents, k=5, bytes=665, mu
             with open(filepath) as inputDoc:
                 text = inputDoc.read().strip()
                 sentences = tokenizer.tokenize(text)
-                D.append(sentences)
+                D.append([s.split(" ") for s in sentences])
 
     # Pass this to the algorithm which should return the summary as
     # a list of sentences.
@@ -144,8 +146,9 @@ def run(opts):
         base, opts.algorithm + inputParams)
     if opts.summarize.lower() == 'true':
         if base is None:
-            print "\n".join([s.strip() for s in algorithm(
-                [sys.stdin.readlines()], k)][:k])
+            summary = processSummary(
+                False, *algorithm([sys.stdin.readlines()], k))
+            print "\n".join([s.strip() for s in summary])
             return
         # Create directory if it does not exist
         if not os.path.exists(outpath):
@@ -157,7 +160,7 @@ def run(opts):
         for folder in folders:
             inpath = os.path.join(inbase, folder)
             try:
-                createSummaries(algorithm, inpath, outpath, sort_sents,
+                createSummaries(algorithm, inpath, outpath, sort_sents, bytes=bytes,
                                 k=k, multiDocument=True)
             except Exception as e:
                 print "Failed with {}".format(inpath)

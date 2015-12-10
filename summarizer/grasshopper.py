@@ -23,10 +23,9 @@ def stationary(Mat, epsilon=0.01):
     We use the linealg package in numpy to take care of this for us.
     '''
     values, vectors = np.linalg.eig(Mat.T)
-    index = np.nonzero((abs(np.real(values) - 1.0) < epsilon) &
-                       (abs(np.imag(values)) < epsilon))[0][0]
+    index = np.nonzero(abs(values - 1.) < epsilon)[0][0]
     # print values
-    q = vectors[:, index]
+    q = np.real(vectors[:, index])
     assert(abs((q**2).sum() - 1) < epsilon)
 
     return q / np.sum(q)  # convert into probability distribution
@@ -125,6 +124,7 @@ def grasshopper(W, r, lamb, k, epsilon=0.0001):
 
     # Normalize the rows of W to create the transition matrix P'
     P = W / np.sum(W, axis=1)
+    r = r.reshape((1, len(P)))
     hatP = lamb * P + (1 - lamb) * r
 
     assert hatP.shape == (n, m)  # Shape should not change!
@@ -149,6 +149,7 @@ def grasshopper(W, r, lamb, k, epsilon=0.0001):
          # Compute the inverse of the fundamental matrix!
         N = np.linalg.inv(
             np.identity(len(nonAbsorbed)) - hatP[nonAbsorbed, nonAbsorbed])
+
         # Compute the expected visit counts
         nuvisit = np.sum(N, axis=1)
         nvisit = np.zeros(n)
@@ -161,10 +162,7 @@ def grasshopper(W, r, lamb, k, epsilon=0.0001):
         absorbed.append(absorbState)
         probs.append(absorbVisit)
 
-        try:
-            nonAbsorbed.remove(absorbState)
-        except ValueError:
-            pdb.set_trace()
+        nonAbsorbed.remove(absorbState)
 
     # Return the results!
     return absorbed
