@@ -25,6 +25,7 @@ argsToAlgo = {
     'baseline': baselines.baseline,
     'geomprior':   baselines.geomPriorBaseline,
     'firstgeomprior':   baselines.modifiedGeomPriorBaseline,
+    'multiplegeomprior': baselines.multipleGeomPrior,
     'frequency': baselines.wordFreqBaseline,
     'textrank': textrank.textRank,
     'modifiedtextrank': textrank.modifiedTextRank,
