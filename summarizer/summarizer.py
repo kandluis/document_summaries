@@ -5,7 +5,7 @@ Copyright, 2015.
 
 Authors:
 Luis Perez (luis.perez.live@gmail.com)
-Kevin Eskici (keskici@college.harvar.edu)
+Kevin Eskici (keskici@college.harvard.edu)
 '''
 import os
 import traceback
